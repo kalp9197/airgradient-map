@@ -1,6 +1,6 @@
 # AirGradient Map API
 
-AirGradient Map API is a backend service that store and server air quality data from various source 
+AirGradient Map API is a backend service that store and serve air quality data from various source 
 
 ## Technical Overview
 
@@ -63,7 +63,7 @@ Name of the database is `agmap`
 cd tools/docker/db
 ```
 
-- Make sure script is executable `$ chmod +x build.sh`
+- Make sure script is executable
 
 ```bash
 chmod +x build.sh
