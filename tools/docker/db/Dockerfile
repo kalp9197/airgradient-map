@@ -67,9 +67,10 @@ COPY ./pgcron_target.conf .
 RUN cat pgcron_target.conf >> /usr/share/postgresql/16/postgresql.conf.sample 
 
 # Build postgis
-##! NOTE: Postgis version might not available in showpkg and throw error, see update from latest docker-postgis dockerfile
+## Get postgis version from ARGS 
 ENV POSTGIS_MAJOR 3
-ENV POSTGIS_VERSION 3.5.1+dfsg-1.pgdg110+1
+ARG POSTGIS_VERSION
+ENV POSTGIS_VERSION=$POSTGIS_VERSION
 
 RUN apt-get update \
       && apt-cache showpkg postgresql-$PG_MAJOR-postgis-$POSTGIS_MAJOR \
