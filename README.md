@@ -45,7 +45,7 @@ Prerequisite: Docker
 
 ### Create Docker Internal Network
 
-Both services will using `dev` network
+Both services use the `dev` network
 
 ```sh
 docker network create dev
