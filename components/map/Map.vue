@@ -47,7 +47,7 @@
   const apiUrl = useRuntimeConfig().public.apiUrl;
   const displayType = ref<MeasureNames>(MeasureNames.PM25);
   const measureSelectOptions: DropdownOption[] = [
-      {
+    {
       label: 'PM2.5 (μg/m³)',
       value: MeasureNames.PM25
     },
@@ -194,7 +194,6 @@
     markers.clearLayers();
     markers.addData(geoJsonMapData);
   }
-
 </script>
 
 <style lang="scss">
