@@ -2,10 +2,13 @@
   <UiProgressBar :show="loading"></UiProgressBar>
   <div id="map">
     <div class="map-controls">
-      <select v-model="displayType" class="display-type-selector">
-        <option :value="MeasureNames.PM25">PM2.5 (μg/m³)</option>
-        <option :value="MeasureNames.PM_AQI">US AQI (PM2.5)</option>
-      </select>
+      <UiDropdownControl
+        :selected-value="displayType"
+        :options="measureSelectOptions"
+        :disabled="loading"
+        @change="handleMeasureChange"
+      >
+      </UiDropdownControl>
     </div>
     <LMap
       class="map"
@@ -23,7 +26,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { ref, watch } from 'vue';
+  import { ref } from 'vue';
   import L, { DivIcon, GeoJSON, LatLngBounds, LatLngExpression } from 'leaflet';
   import 'leaflet/dist/leaflet.css';
   import '@maplibre/maplibre-gl-leaflet';
@@ -34,7 +37,7 @@
   import { GeoSearchControl, OpenStreetMapProvider } from 'leaflet-geosearch';
 
   import { convertToGeoJSON } from '~/utils/';
-  import { AGMapData, MeasureNames, AGMapDataItemType, SensorType } from '~/types';
+  import { AGMapData, MeasureNames, AGMapDataItemType, SensorType, DropdownOption } from '~/types';
   import { getPM25Color, getAQIColor } from '~/utils/';
   import { INITIAL_MAP_VIEW_CONFIG } from '~/constants';
   import { pm25ToAQI } from '~/utils/aqi';
@@ -43,6 +46,16 @@
   const map = ref<typeof LMap>();
   const apiUrl = useRuntimeConfig().public.apiUrl;
   const displayType = ref<MeasureNames>(MeasureNames.PM25);
+  const measureSelectOptions: DropdownOption[] = [
+      {
+      label: 'PM2.5 (μg/m³)',
+      value: MeasureNames.PM25
+    },
+    {
+      label: 'US AQI (PM2.5)',
+      value: MeasureNames.PM_AQI
+    }
+  ];
 
   let geoJsonMapData: GeoJsonObject;
   let mapInstance: L.Map;
@@ -176,12 +189,12 @@
     mapInstance.addControl(searchControl);
   }
 
-  watch(displayType, () => {
-    if (markers) {
-      markers.clearLayers();
-      markers.addData(geoJsonMapData);
-    }
-  });
+  function handleMeasureChange(value: MeasureNames): void {
+    displayType.value = value;
+    markers.clearLayers();
+    markers.addData(geoJsonMapData);
+  }
+
 </script>
 
 <style lang="scss">
