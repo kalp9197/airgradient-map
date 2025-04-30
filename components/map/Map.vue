@@ -3,7 +3,7 @@
   <div id="map">
     <div class="map-controls">
       <UiDropdownControl
-        :selected-value="displayType"
+        :selected-value="useGeneralConfigStore().selectedMeasure"
         :options="measureSelectOptions"
         :disabled="loading"
         @change="handleMeasureChange"
@@ -41,11 +41,11 @@
   import { getPM25Color, getAQIColor } from '~/utils/';
   import { INITIAL_MAP_VIEW_CONFIG } from '~/constants';
   import { pm25ToAQI } from '~/utils/aqi';
+  import { useGeneralConfigStore } from '~/store/general-config-store';
 
   const loading = ref<boolean>(false);
   const map = ref<typeof LMap>();
   const apiUrl = useRuntimeConfig().public.apiUrl;
-  const displayType = ref<MeasureNames>(MeasureNames.PM25);
   const measureSelectOptions: DropdownOption[] = [
     {
       label: 'PM2.5 (μg/m³)',
@@ -89,9 +89,12 @@
     const pm25Value: number = feature.properties?.value || 0;
     const aqiValue: number = pm25ToAQI(pm25Value);
 
-    const displayValue = displayType.value === MeasureNames.PM25 ? pm25Value : aqiValue;
+    const displayValue =
+      useGeneralConfigStore().selectedMeasure === MeasureNames.PM25 ? pm25Value : aqiValue;
     const colorConfig: { bgColor: string; textColorClass: string } =
-      displayType.value === MeasureNames.PM25 ? getPM25Color(pm25Value) : getAQIColor(aqiValue);
+      useGeneralConfigStore().selectedMeasure === MeasureNames.PM25
+        ? getPM25Color(pm25Value)
+        : getAQIColor(aqiValue);
 
     const isSensor: boolean = feature.properties?.type === AGMapDataItemType.sensor;
     const isReference: boolean = feature.properties?.sensorType === SensorType.reference;
@@ -117,7 +120,7 @@
         <div class="tooltip-content">
           <div class="measurement">
             <span class="value">${Math.round(displayValue)}</span>
-            <span class="unit">${displayType.value === MeasureNames.PM25 ? 'PM2.5 μg/m³' : 'US AQI (PM2.5)'}</span>
+            <span class="unit">${useGeneralConfigStore().selectedMeasure === MeasureNames.PM25 ? 'PM2.5 μg/m³' : 'US AQI (PM2.5)'}</span>
           </div>
         </div>
       </div>
@@ -190,7 +193,7 @@
   }
 
   function handleMeasureChange(value: MeasureNames): void {
-    displayType.value = value;
+    useGeneralConfigStore().setSelectedMeasure(value);
     markers.clearLayers();
     markers.addData(geoJsonMapData);
   }
@@ -325,7 +328,6 @@
       input {
         height: 36px !important;
         font-size: 16px !important;
-        padding: 0 12px 0 30px !important;
       }
     }
 
