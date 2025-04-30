@@ -3,7 +3,7 @@
   <div id="map">
     <div class="map-controls">
       <UiDropdownControl
-        :selected-value="useGeneralConfigStore().selectedMeasure"
+        :selected-value="generalConfigStore.selectedMeasure"
         :options="measureSelectOptions"
         :disabled="loading"
         @change="handleMeasureChange"
@@ -46,6 +46,7 @@
   const loading = ref<boolean>(false);
   const map = ref<typeof LMap>();
   const apiUrl = useRuntimeConfig().public.apiUrl;
+  const generalConfigStore = useGeneralConfigStore();
   const measureSelectOptions: DropdownOption[] = [
     {
       label: 'PM2.5 (μg/m³)',
@@ -90,9 +91,9 @@
     const aqiValue: number = pm25ToAQI(pm25Value);
 
     const displayValue =
-      useGeneralConfigStore().selectedMeasure === MeasureNames.PM25 ? pm25Value : aqiValue;
+      generalConfigStore.selectedMeasure === MeasureNames.PM25 ? pm25Value : aqiValue;
     const colorConfig: { bgColor: string; textColorClass: string } =
-      useGeneralConfigStore().selectedMeasure === MeasureNames.PM25
+      generalConfigStore.selectedMeasure === MeasureNames.PM25
         ? getPM25Color(pm25Value)
         : getAQIColor(aqiValue);
 
@@ -120,7 +121,7 @@
         <div class="tooltip-content">
           <div class="measurement">
             <span class="value">${Math.round(displayValue)}</span>
-            <span class="unit">${useGeneralConfigStore().selectedMeasure === MeasureNames.PM25 ? 'PM2.5 μg/m³' : 'US AQI (PM2.5)'}</span>
+            <span class="unit">${generalConfigStore.selectedMeasure === MeasureNames.PM25 ? 'PM2.5 μg/m³' : 'US AQI (PM2.5)'}</span>
           </div>
         </div>
       </div>

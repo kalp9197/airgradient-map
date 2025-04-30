@@ -1,4 +1,4 @@
-import { MeasureNames } from "../shared";
+import { MeasureNames } from '../shared';
 
 export type GeneralConfigStoreState = {
   selectedMeasure: MeasureNames;
