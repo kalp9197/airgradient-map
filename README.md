@@ -2,6 +2,12 @@
 
 AirGradient Map is a web application for visualizing and analyzing air quality data.
 
+<p align="center">
+  <a href="https://github.com/user-attachments/assets/04455b37-6fe3-4584-b750-f49679d260fa">
+    <img src="https://github.com/user-attachments/assets/04455b37-6fe3-4584-b750-f49679d260fa" width="800" alt="Screenshot of the map application">
+  </a>
+</p>
+
 
 ⚠️ **Important:** This repository is a more scalable replacement for our current [production app](https://www.airgradient.com/map/). 
 The old app’s tech stack can’t scale to meet our requirements, so we’ve built this new codebase. First, we’ll migrate all existing features here; once that’s done, we’ll layer on new enhancements and capabilities.
