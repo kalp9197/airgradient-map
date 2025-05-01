@@ -8,7 +8,7 @@
     class="ag-dropdown-control"
     @update:modelValue="handleChange"
     variant="outlined"
-    :density="props.size === DropdownSize.LARGE ? 'comfortable' : 'compact'"
+    :density="props.size === DropdownSize.NORMAL ? 'comfortable' : 'compact'"
   />
 </template>
 
@@ -35,13 +35,12 @@
     /**
      * Size of the dropdown.
      * @type DropdownSize
-     * @default DropdownSize.LARGE
+     * @default DropdownSize.NORMAL
      */
     size: {
       type: String as PropType<DropdownSize>,
-      default: DropdownSize.LARGE
+      default: DropdownSize.NORMAL
     },
-
     /**
      * Whether the dropdown is disabled.
      * @type {boolean}
