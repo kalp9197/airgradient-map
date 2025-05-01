@@ -1,24 +1,24 @@
 # AirGradient Map API
 
-AirGradient Map API is a backend service that store and serve air quality data from various source 
+AirGradient Map API is a backend service that stores and serves air quality data from various sources
 
 ## Technical Overview
 
 ### Backend Service
 
-API endpoinds docs available [here](https://map-data-int.airgradient.com/map/api/v1/docs) or if service available locally, go to http://localhost:3000/map/api/v1/docs. 
+API docs are available [here](https://map-data-int.airgradient.com/map/api/v1/docs) or if service available locally, go to http://localhost:3000/map/api/v1/docs. 
 
 #### Tasks
 
-AirGradient Map API also run task that act as cron job which the use is to retrieve sensor location and measures from various data source. The tasks as follow:
+The AirGradient Map API also runs a task that acts as a cron job, retrieving sensor locations and measurements from various data sources. The task is as follow:
 
-1. Sync and retrieve sensor location with its latest measures from AirGradient public API every 15 minutes
-2. Sync sensor location from OpenAQ with _Reference_ type and specific provider (EEA, Air4Thai, AirNow) every day at midnight 
-3. Retrieve sensor latest measures from every record available which data source is OpenAQ every 1 hour 
+1. Every 15 minutes: sync and retrieve sensor location with its latest measures from AirGradient public API
+2. Every day at midnight: sync sensor location from OpenAQ with _Reference_ type and specific provider (EEA, Air4Thai, AirNow)
+3. Every 1 hour: retrieve the latest sensor measurements from all records with OpenAQ as the data source 
 
 ### Database
 
-Database is using PostgreSQL with 2 extensions [PostGIS](https://postgis.net/) and [pg_timeseries](https://github.com/tembo-io/pg_timeseries). PostGIS is used to everything related to geospatial data such as storing coordinates, clustering, etc. pg_timeseries is used for making measurements table become time series table, that will make maintaining partition table easier. Partition duration is set to 1 week.
+Database is PostgreSQL with 2 extensions [PostGIS](https://postgis.net/) and [pg_timeseries](https://github.com/tembo-io/pg_timeseries). PostGIS is used for everything related to geospatial data such as storing coordinates, clustering, etc. pg_timeseries is used to convert the measurements table into a time series table, that will make maintaining partition table easier. Partition duration is set to 1 week.
 
 #### DB Schema
 
@@ -45,7 +45,7 @@ Prerequisite: Docker
 
 ### Create Docker Internal Network
 
-Both service will using `dev` network
+Both services use the `dev` network
 
 ```sh
 docker network create dev
