@@ -2,6 +2,9 @@
 
 AirGradient Map is a web application for visualizing and analyzing air quality data.
 
+🌍 Explore it live: [map-int.airgradient.com](https://map-int.airgradient.com/)
+
+
 <p align="center">
   <a href="https://github.com/user-attachments/assets/04455b37-6fe3-4584-b750-f49679d260fa">
     <img src="https://github.com/user-attachments/assets/04455b37-6fe3-4584-b750-f49679d260fa" width="800" alt="Screenshot of the map application">
