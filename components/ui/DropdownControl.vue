@@ -6,9 +6,9 @@
     :model-value="selectedValue"
     :disabled="disabled"
     class="ag-dropdown-control"
-    @update:modelValue="handleChange"
     variant="outlined"
     :density="props.size === DropdownSize.NORMAL ? 'comfortable' : 'compact'"
+    @update:modelValue="handleChange"
   />
 </template>
 
