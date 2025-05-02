@@ -3,11 +3,11 @@
     v-if="icon && !customIcon"
     :ripple="ripple"
     :disabled="disabled"
-    @click="handleClick"
     :icon="icon"
     variant="plain"
     class="custom-icon-button"
     :size="size === ButtonSize.NORMAL ? 'default' : 'small'"
+    @click="handleClick"
   >
   </v-btn>
 
@@ -15,10 +15,10 @@
     v-else-if="customIcon"
     :ripple="ripple"
     :disabled="disabled"
-    @click="handleClick"
     variant="plain"
     class="custom-icon-button"
     :size="size === ButtonSize.NORMAL ? 'default' : 'small'"
+    @click="handleClick"
   >
     <img
       width="24"

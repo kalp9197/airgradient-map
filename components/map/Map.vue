@@ -11,8 +11,8 @@
       </UiDropdownControl>
     </div>
     <LMap
-      class="map"
       ref="map"
+      class="map"
       :maxBoundsViscosity="INITIAL_MAP_VIEW_CONFIG.maxBoundsViscosity"
       :maxBounds="INITIAL_MAP_VIEW_CONFIG.maxBounds"
       :zoom="INITIAL_MAP_VIEW_CONFIG.zoom"
