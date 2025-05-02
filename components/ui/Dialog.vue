@@ -2,17 +2,17 @@
   <v-dialog
     :model-value="props.dialog.isOpen"
     :persistent="persistent"
-    @update:model-value="close"
     :max-width="DIALOG_SIZE_TO_WIDTH[size]"
+    @update:model-value="close"
   >
     <v-card>
       <div v-if="showCloseIconButton" class="close-icon-button-box">
         <UiIconButton
-          @click="close"
           :ripple="false"
           :size="ButtonSize.NORMAL"
           icon="mdi-close"
           variant="plain"
+          @click="close"
         >
         </UiIconButton>
       </div>
