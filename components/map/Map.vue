@@ -23,10 +23,11 @@
     >
     </LMap>
   </div>
+  <DialogsLocationHistoryDialog :dialog="locationHistoryDialog" v-if="locationHistoryDialog" />
 </template>
 
 <script lang="ts" setup>
-  import { ref } from 'vue';
+  import { computed, ref } from 'vue';
   import L, { DivIcon, GeoJSON, LatLngBounds, LatLngExpression } from 'leaflet';
   import 'leaflet/dist/leaflet.css';
   import '@maplibre/maplibre-gl-leaflet';
@@ -37,16 +38,29 @@
   import { GeoSearchControl, OpenStreetMapProvider } from 'leaflet-geosearch';
 
   import { convertToGeoJSON } from '~/utils/';
-  import { AGMapData, MeasureNames, AGMapDataItemType, SensorType, DropdownOption } from '~/types';
+  import {
+    AGMapData,
+    MeasureNames,
+    AGMapDataItemType,
+    SensorType,
+    DropdownOption,
+    DialogId
+  } from '~/types';
   import { getPM25Color, getAQIColor } from '~/utils/';
   import { INITIAL_MAP_VIEW_CONFIG } from '~/constants';
   import { pm25ToAQI } from '~/utils/aqi';
   import { useGeneralConfigStore } from '~/store/general-config-store';
+  import { dialogStore } from '~/composables/shared/ui/useDialog';
 
   const loading = ref<boolean>(false);
   const map = ref<typeof LMap>();
   const apiUrl = useRuntimeConfig().public.apiUrl;
   const generalConfigStore = useGeneralConfigStore();
+
+  const locationHistoryDialogId = DialogId.LOCATION_HISTORY_CHART;
+
+  const locationHistoryDialog = computed(() => dialogStore.getDialog(locationHistoryDialogId));
+
   const measureSelectOptions: DropdownOption[] = [
     {
       label: 'PM2.5 (μg/m³)',
@@ -134,8 +148,13 @@
         permanent: false,
         className: 'ag-marker-tooltip'
       });
-    } else if (!isSensor) {
-      marker.on('click', () => {
+    }
+
+    marker.on('click', () => {
+      if (isSensor && feature.properties) {
+        console.log(feature.properties);
+        dialogStore.open(locationHistoryDialogId, { location: feature.properties });
+      } else if (!isSensor) {
         const currentZoom = mapInstance.getZoom();
         const newZoom = Math.min(currentZoom + 2, INITIAL_MAP_VIEW_CONFIG.maxZoom);
 
@@ -143,8 +162,8 @@
           animate: true,
           duration: 0.8
         });
-      });
-    }
+      }
+    });
 
     return marker;
   }
