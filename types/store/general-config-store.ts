@@ -1,4 +1,4 @@
-import { HistoryPeriod, HistoryPeriodConfig, MeasureNames } from '../shared';
+import { HistoryPeriodConfig, MeasureNames } from '../shared';
 
 export type GeneralConfigStoreState = {
   selectedMeasure: MeasureNames;

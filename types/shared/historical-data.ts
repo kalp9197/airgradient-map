@@ -14,27 +14,22 @@ export enum HistoryPeriodUnit {
   MONTH = 'month',
   DAY = 'day',
   HOUR = 'hour',
-  MINUTE = 'minute'
-}
-
-
-export interface HistoryBucketConfig {
-  label: string;
-  value: HistoryBucket;
-  bucketSize: string;
+  MINUTE = 'minute',
+  WEEK = 'week'
 }
 
 export enum HistoryBucket {
-  MINUTES_5= 'minutes_5',
-  MINUTES_15= 'minutes_15',
-  HOUR = 'hour',
-  DAY = 'day',
-  WEEK = 'week',
-  MONTH = 'month',
+  MINUTES_5 = '5m',
+  MINUTES_15 = '15m',
+  HOUR = '1h',
+  DAY = '1d',
+  WEEK = '1w',
+  MONTH = '1m'
 }
 
 export interface HistoryPeriodConfig {
   unit: HistoryPeriodUnit;
+  chartUnit: HistoryPeriodUnit;
   count: number;
   label: string;
   defaultBucketSize: HistoryBucket;
@@ -49,6 +44,5 @@ export enum HistoryPeriod {
   '14_days' = '14_days',
   '30_days' = '30_days',
   '60_days' = '60_days',
-  '90_days' = '90_days',
+  '90_days' = '90_days'
 }
-

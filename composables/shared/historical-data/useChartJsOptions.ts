@@ -65,35 +65,13 @@ export function useChartjsOptions({
           drawTicks: false
         },
         time: {
-          tooltipFormat: 'DD. MMM  HH:mm',
-          unit: currentPeriod.unit,
+          tooltipFormat: 'dd. MMM  HH:mm',
+          unit: currentPeriod.chartUnit,
           displayFormats: {
             quarter: 'MMM YYYY'
           }
         }
       },
-      // x: {
-      //   type: 'time',
-      //   time: {
-      //     tooltipFormat: 'dd. LLL  HH:mm',
-      //     unit: 'day',
-      //     displayFormats: {
-      //       quarter: 'LLL yyyy',
-      //     },
-      //   },
-      //   grid: {
-      //     drawTicks: false,
-      //     drawOnChartArea: false,
-      //   },
-      //   ticks: {
-      //     color: '#212121',
-      //     font: {
-      //       family: '"Catamaran", sans-serif',
-      //       size: annotationsFontSize,
-      //     },
-      //     padding: 3,
-      //   },
-      // },
       y: {
         beginAtZero: true,
         suggestedMax: 8,

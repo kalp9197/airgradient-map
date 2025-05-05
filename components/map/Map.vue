@@ -23,7 +23,7 @@
     >
     </LMap>
   </div>
-  <DialogsLocationHistoryDialog :dialog="locationHistoryDialog" v-if="locationHistoryDialog" />
+  <DialogsLocationHistoryDialog v-if="locationHistoryDialog" :dialog="locationHistoryDialog" />
 </template>
 
 <script lang="ts" setup>
@@ -51,6 +51,7 @@
   import { pm25ToAQI } from '~/utils/aqi';
   import { useGeneralConfigStore } from '~/store/general-config-store';
   import { dialogStore } from '~/composables/shared/ui/useDialog';
+  import { MEASURE_LABELS } from '~/constants/shared/measure-lables';
 
   const loading = ref<boolean>(false);
   const map = ref<typeof LMap>();
@@ -63,11 +64,11 @@
 
   const measureSelectOptions: DropdownOption[] = [
     {
-      label: 'PM2.5 (μg/m³)',
+      label: MEASURE_LABELS[MeasureNames.PM25],
       value: MeasureNames.PM25
     },
     {
-      label: 'US AQI (PM2.5)',
+      label: MEASURE_LABELS[MeasureNames.PM_AQI],
       value: MeasureNames.PM_AQI
     }
   ];
@@ -127,28 +128,28 @@
 
     const marker = L.marker(latlng, { icon });
 
-    if (isSensor && feature.properties) {
-      const locationName: string = feature.properties.locationName || 'Unknown Location';
-      const tooltipContent = `
-      <div class="marker-tooltip">
-        <div class="tooltip-header">${locationName}</div>
-        <div class="tooltip-content">
-          <div class="measurement">
-            <span class="value">${Math.round(displayValue)}</span>
-            <span class="unit">${generalConfigStore.selectedMeasure === MeasureNames.PM25 ? 'PM2.5 μg/m³' : 'US AQI (PM2.5)'}</span>
-          </div>
-        </div>
-      </div>
-    `;
+    // if (isSensor && feature.properties) {
+    //   const locationName: string = feature.properties.locationName || 'Unknown Location';
+    //   const tooltipContent = `
+    //   <div class="marker-tooltip">
+    //     <div class="tooltip-header">${locationName}</div>
+    //     <div class="tooltip-content">
+    //       <div class="measurement">
+    //         <span class="value">${Math.round(displayValue)}</span>
+    //         <span class="unit">${generalConfigStore.selectedMeasure === MeasureNames.PM25 ? 'PM2.5 μg/m³' : 'US AQI (PM2.5)'}</span>
+    //       </div>
+    //     </div>
+    //   </div>
+    // `;
 
-      marker.bindTooltip(tooltipContent, {
-        direction: 'top',
-        offset: L.point(0, -12),
-        opacity: 1,
-        permanent: false,
-        className: 'ag-marker-tooltip'
-      });
-    }
+    //   marker.bindTooltip(tooltipContent, {
+    //     direction: 'top',
+    //     offset: L.point(0, -12),
+    //     opacity: 1,
+    //     permanent: false,
+    //     className: 'ag-marker-tooltip'
+    //   });
+    // }
 
     marker.on('click', () => {
       if (isSensor && feature.properties) {
@@ -169,7 +170,7 @@
   }
 
   async function updateMap(): Promise<void> {
-    if (loading.value) {
+    if (loading.value || locationHistoryDialog.value?.isOpen) {
       return;
     }
     loading.value = true;
