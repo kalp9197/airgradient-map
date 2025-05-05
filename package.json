@@ -27,8 +27,8 @@
     "node": ">=19.0.0"
   },
   "dependencies": {
-    "@capacitor/android": "^6.2.1",
-    "@capacitor/core": "^6.2.1",
+    "@capacitor/android": "^7.2.0",
+    "@capacitor/core": "^7.2.0",
     "@capacitor/ios": "^7.2.0",
     "@maplibre/maplibre-gl-leaflet": "^0.0.22",
     "@mdi/font": "^7.4.47",
@@ -47,7 +47,7 @@
     "vue-tsc": "^2.2.8"
   },
   "devDependencies": {
-    "@capacitor/cli": "^6.2.1",
+    "@capacitor/cli": "^7.2.0",
     "@nuxtjs/leaflet": "^1.2.6",
     "@vue/eslint-config-prettier": "^10.2.0",
     "prettier": "^3.5.3",
