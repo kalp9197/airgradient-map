@@ -1,8 +1,15 @@
-import { HistoryBucket } from '~/types';
+import { HistoryBucket, HistoryBucketConfig } from '~/types';
 
-export const HISTORY_BUCKETS: HistoryBucket[] = [
+export const HISTORY_BUCKETS: HistoryBucketConfig[] = [
   {
     label: '1h',
-    value: '1h'
-  }
+    value: HistoryBucket.HOUR,
+    bucketSize: '1h'
+  },
+  {
+    label: '1d',
+    value: HistoryBucket.DAY,
+    bucketSize: '1d'
+  },
+  
 ];

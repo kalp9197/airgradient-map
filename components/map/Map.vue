@@ -176,7 +176,7 @@
 
     try {
       const bounds: LatLngBounds = mapInstance.getBounds();
-      const response = await $fetch<AGMapData>(`${apiUrl}/v1/measurements/current/cluster`, {
+      const response = await $fetch<AGMapData>(`${apiUrl}/measurements/current/cluster`, {
         params: {
           xmin: bounds.getSouth(),
           ymin: bounds.getWest(),
