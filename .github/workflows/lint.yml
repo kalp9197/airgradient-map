@@ -10,39 +10,17 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v2
 
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '22'
-        cache: 'npm'
+        node-version: '20' # Needs to manually be updated
 
     - name: Install dependencies
       run: |
-        npm ci --ignore-scripts
-      
-    - name: Fix oxc-parser issue
-      run: |
-        npm uninstall oxc-parser
-        npm install oxc-parser@2.7.1 --no-save
-        
-        # If version of oxc-parser that has pre-built binaries for linux fails, install an alternative ESLint parser
-        if [ $? -ne 0 ]; then
-          echo "Failed to install oxc-parser, falling back to @typescript-eslint/parser"
-          npm install @typescript-eslint/parser --no-save
-          
-          # Create or update .eslintrc.js to use the alternative parser
-          if [ -f ".eslintrc.js" ]; then
-            sed -i 's/parser: .*/parser: "@typescript-eslint\/parser",/g' .eslintrc.js
-          elif [ -f ".eslintrc.json" ]; then
-            sed -i 's/"parser": .*/"parser": "@typescript-eslint\/parser",/g' .eslintrc.json
-          fi
-        fi
-
-    - name: Prepare Nuxt
-      run: |
-        npx nuxt prepare || echo "Nuxt prepare failed, but continuing..."
+        npm install
 
     - name: Run ESLint
-      run: npm run lint
+      run: |
+        npm run lint
