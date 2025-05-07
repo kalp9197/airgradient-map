@@ -2,6 +2,7 @@ import { LocationHistoryDataItem } from '~/types';
 import { getCO2Color, getPM25Color } from '~/utils/colors';
 import { MeasureNames } from '~/types';
 import { pm25ToAQI } from '~/utils/aqi';
+import { CHART_MIN_VISIBLE_VALUE } from '~/constants/shared/chart-min-visible-value';
 
 interface UseChartjsDataParams {
   data: LocationHistoryDataItem[];
@@ -11,6 +12,7 @@ interface UseChartjsDataParams {
 export function useChartjsData({ data, measure }: UseChartjsDataParams) {
   const chartLabels: string[] = [];
   const chartValues: number[] = [];
+  const unProcessedChartValues: number[] = [];
   const barColors: string[] = [];
 
   const sortedData = [...data].sort(
@@ -24,12 +26,12 @@ export function useChartjsData({ data, measure }: UseChartjsDataParams) {
 
     const roundedValue = parseFloat(parsedValue.toFixed(2));
     chartLabels.push(item.timebucket);
+    unProcessedChartValues.push(roundedValue);
 
     if (roundedValue === 0 && (measure === MeasureNames.PM25 || measure === MeasureNames.PM_AQI)) {
-      chartValues.push(0.4);
-      barColors.push(getPM25Color(0.4).bgColor);
+      chartValues.push(CHART_MIN_VISIBLE_VALUE);
+      barColors.push(getPM25Color(CHART_MIN_VISIBLE_VALUE).bgColor);
     } else if (measure === MeasureNames.CO2) {
-      chartValues.push(roundedValue);
       barColors.push(getCO2Color(roundedValue).bgColor);
     } else {
       const valueToUse = measure === MeasureNames.PM_AQI ? pm25ToAQI(roundedValue) : roundedValue;
@@ -52,6 +54,7 @@ export function useChartjsData({ data, measure }: UseChartjsDataParams) {
           minBarLength: 0
         }
       ]
-    }
+    },
+    chartValues: unProcessedChartValues
   };
 }

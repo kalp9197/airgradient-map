@@ -1,5 +1,7 @@
 import { ChartOptions } from 'chart.js';
-import { AnnotationPluginOptions } from 'chartjs-plugin-annotation';
+import { AnnotationOptions } from 'chartjs-plugin-annotation';
+import { CHART_MIN_VISIBLE_VALUE } from '~/constants/shared/chart-min-visible-value';
+import { MEASURE_LABELS_WITH_UNITS } from '~/constants/shared/measure-lables';
 import { useGeneralConfigStore } from '~/store/general-config-store';
 
 import { MeasureNames } from '~/types';
@@ -8,7 +10,7 @@ import { getChartFontSize } from '~/utils';
 interface UseChartjsOptionsParams {
   measure: MeasureNames;
   animated: boolean;
-  annotations: AnnotationPluginOptions[];
+  annotations: Record<string, AnnotationOptions>;
 }
 
 export function useChartjsOptions({
@@ -19,9 +21,7 @@ export function useChartjsOptions({
   const annotationsFontSize = getChartFontSize(measure);
   const currentPeriod = useGeneralConfigStore().selectedHistoryPeriod;
 
-  let axisLabel = '';
-  if (measure === MeasureNames.PM25) axisLabel = 'PM2.5 in μg/m³';
-  if (measure === MeasureNames.PM_AQI) axisLabel = 'PM2.5 in US AQI';
+  const axisLabel = MEASURE_LABELS_WITH_UNITS[measure];
 
   return {
     maintainAspectRatio: false,
@@ -31,7 +31,8 @@ export function useChartjsOptions({
       tooltip: {
         callbacks: {
           label: context => {
-            const value = context.raw;
+            let value = context.raw;
+            if (value === CHART_MIN_VISIBLE_VALUE) value = 0;
             if (measure === MeasureNames.PM25) return `PM2.5: ${value} μg/m³`;
             if (measure === MeasureNames.PM_AQI) return `PM2.5: ${value} US AQI`;
             return `CO2: ${value} ppm`;
@@ -74,7 +75,6 @@ export function useChartjsOptions({
       },
       y: {
         beginAtZero: true,
-        suggestedMax: 8,
         title: {
           display: false,
           text: axisLabel

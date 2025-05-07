@@ -22,6 +22,7 @@ export enum HistoryBucket {
   MINUTES_5 = '5m',
   MINUTES_15 = '15m',
   HOUR = '1h',
+  HOUR_8 = '8h',
   DAY = '1d',
   WEEK = '1w',
   MONTH = '1m'
@@ -37,12 +38,10 @@ export interface HistoryPeriodConfig {
 }
 
 export enum HistoryPeriod {
-  '12_hours' = '12_hours',
-  '24_hours' = '24_hours',
-  '2_days' = '2_days',
-  '7_days' = '7_days',
-  '14_days' = '14_days',
-  '30_days' = '30_days',
-  '60_days' = '60_days',
-  '90_days' = '90_days'
+  DAY = 'day',
+  WEEK = 'week',
+  MONTH = 'month',
+  MONTHS_3 = '3_months',
+  MONTHS_6 = '6_months',
+  YEAR = 'year'
 }

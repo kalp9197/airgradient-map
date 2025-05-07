@@ -20,43 +20,30 @@ Location
       </v-card-title>
     </template>
     <template #body>
-      <div class="chart-controls mb-5">
-        <div
-          v-if="currentValueData"
-          :style="{ backgroundColor: currentValueData.bgColor }"
-          class="current-values py-2 px-3"
-        >
-          <div :class="currentValueData.textColor" class="main-current-value">
-            <h4 :class="currentValueData.textColor" class="mb-1">
-              {{ currentValueData.value }}
-              <span class="unit-label">{{ currentValueData.unit }}</span>
-            </h4>
-            <p :class="currentValueData.textColor" class="mb-0 current-label">
-              Current {{ currentValueData.label }}
-            </p>
-          </div>
-          <div>
-            <p :class="currentValueData.textColor" class="mb-0">
-              <img
-                class="measure-icon"
-                width="18px"
-                src="/images/icons/temperature_icon.svg"
-                alt="temperature"
-              />
-              22 °C
-            </p>
-            <p :class="currentValueData.textColor" class="mb-0">
-              <img
-                class="measure-icon"
-                width="18px"
-                src="/images/icons/humidity_icon.svg"
-                alt="humidity"
-              />
-              63 %
-            </p>
+      <div style="height: 65px" class="chart-controls mb-5">
+        <div>
+          <div
+            v-if="currentValueData"
+            :style="{ backgroundColor: currentValueData.bgColor }"
+            class="current-values py-2 px-3"
+          >
+            <div :class="currentValueData.textColor" class="main-current-value">
+              <h4 :class="currentValueData.textColor" class="mb-2">
+                {{ currentValueData.value }}
+                <span class="unit-label">{{ currentValueData.unit }}</span>
+              </h4>
+              <p :class="currentValueData.textColor" class="mb-0 current-label">
+                <span class="measure-label">
+                  <UiHTMLSafelabel :label="currentValueData.labelHTML" />
+                </span>
+                {{ $formatDate(currentValueData.date, 'HH:mm,  MMM d') }}
+              </p>
+            </div>
           </div>
         </div>
+
         <UiDropdownControl
+          v-if="chartOptions"
           class="period-control"
           :selected-value="generalConfigStore.selectedHistoryPeriod.value"
           :options="HISTORY_PERIODS"
@@ -65,12 +52,23 @@ Location
         >
         </UiDropdownControl>
       </div>
-
       <ClientOnly>
-        <div style="height: 400px; width: 100%">
+        <div style="height: 350px; width: 100%">
           <Bar v-if="chartData && chartOptions" :data="chartData" :options="chartOptions" />
         </div>
       </ClientOnly>
+      <p style="height: 20px" class="mb-0 mt-4">
+        <small v-if="chartOptions && locationDetails?.ownerNameDisplay"> Contributor: 
+          <span v-if="!locationDetails?.url">
+            {{ locationDetails?.ownerNameDisplay }} 
+          </span>
+          <span v-else>
+            <a :href="locationDetails?.url" target="_blank">
+              {{ locationDetails?.ownerNameDisplay }} 
+            </a>
+          </span>
+        </small>
+      </p>
     </template>
   </UiDialog>
 </template>
@@ -80,6 +78,8 @@ Location
     DialogSize,
     HistoryPeriod,
     HistoryPeriodConfig,
+    LocationDetails,
+    LocationHistoryDataItem,
     MeasureNames,
     SensorType
   } from '~/types';
@@ -89,68 +89,105 @@ Location
 
   import { DialogInstance, AGMapLocationData, LocationHistoryData } from '~/types';
   import { useGeneralConfigStore } from '~/store/general-config-store';
-  import { useRuntimeConfig } from 'nuxt/app';
+  import { useRuntimeConfig, useNuxtApp } from 'nuxt/app';
   import { getDateRangeFromToday } from '~/utils/date';
   import { HISTORY_PERIODS } from '~/constants/shared/chart-periods';
   import { useChartjsOptions } from '~/composables/shared/historical-data/useChartJsOptions';
   import { useChartjsData } from '~/composables/shared/historical-data/useChartJsData';
-  import { MEASURE_LABELS } from '~/constants/shared/measure-lables';
+  import { MEASURE_LABELS_SUBSCRIPTS } from '~/constants/shared/measure-lables';
   import { pm25ToAQI } from '~/utils/aqi';
   import { getAQIColor, getPM25Color } from '~/utils';
   import { MEASURE_UNITS } from '~/constants/shared/measure-units';
+  import { useChartJsAnnotations } from '~/composables/shared/historical-data/useChartJsAnnotations';
 
   const props = defineProps<{
     dialog: DialogInstance<{ location: AGMapLocationData }>;
   }>();
 
+  const { $formatDate } = useNuxtApp();
   const apiUrl = useRuntimeConfig().public.apiUrl;
   const generalConfigStore = useGeneralConfigStore();
   const mapLocationData: Ref<AGMapLocationData> = ref(null);
   const locationHistoryData: Ref<LocationHistoryData> = ref(null);
+  const locationDetails: Ref<LocationDetails> = ref(null);
   const chartData: Ref<ChartData<'bar'>> = ref(null);
   const chartOptions: Ref<ChartOptions<'bar'>> = ref(null);
+  const historyLoading: Ref<boolean> = ref(false);
+  const detailsLoading: Ref<boolean> = ref(false);
+  const loading: Ref<boolean> = computed(() => historyLoading.value || detailsLoading.value);
+
   const currentValueData: Ref<{
     bgColor: string;
     value: number;
     textColor: string;
-    label: string;
+    labelHTML: string;
     unit: string;
+    date: string;
   }> = computed(() => {
-    if (!mapLocationData.value) {
+    if (!locationHistoryData.value) {
       return null;
     }
+
+    const mostRecentData = getMostRecentData(locationHistoryData.value.data);
+    if (!mostRecentData) {
+      return null;
+    }
+
     let colorConfig: { bgColor: string; textColorClass: string } = {
       bgColor: '',
       textColorClass: ''
     };
 
-    let value = mapLocationData.value.value;
+    let value = Number.parseFloat(mostRecentData.value);
+
     if (generalConfigStore.selectedMeasure === MeasureNames.PM_AQI) {
-      value = pm25ToAQI(mapLocationData.value.value);
+      value = pm25ToAQI(value);
       colorConfig = getAQIColor(value);
     } else {
       colorConfig = getPM25Color(value);
     }
+
     return {
       bgColor: colorConfig.bgColor,
       value: value,
       unit: MEASURE_UNITS[generalConfigStore.selectedMeasure],
-      label: MEASURE_LABELS[generalConfigStore.selectedMeasure],
-      textColor: colorConfig.textColorClass
+      labelHTML: MEASURE_LABELS_SUBSCRIPTS[generalConfigStore.selectedMeasure],
+      textColor: colorConfig.textColorClass,
+      date: mostRecentData.timebucket
     };
   });
-  const loading: Ref<boolean> = ref(false);
 
-  onMounted(() => {
-    mapLocationData.value = props.dialog?.data.location;
-    if (mapLocationData.value) {
-      console.log(mapLocationData.value);
-      fetchLocationHistory(mapLocationData.value.locationId);
+  function getMostRecentData(data: LocationHistoryDataItem[]): LocationHistoryDataItem | null {
+    if (data?.length) {
+      let currentIndex = data.length;
+      let value = null;
+      while (currentIndex > 0 && value === null) {
+        if (data[currentIndex]?.value) {
+          value = data[currentIndex];
+        }
+        currentIndex--;
+      }
+      return value;
     }
-  });
+    return null;
+  }
+
+  async function fetchLocationDetails(locationId: number): Promise<void> {
+    detailsLoading.value = true;
+    try {
+      const response = await $fetch<LocationDetails>(`${apiUrl}/locations/${locationId}`, {
+        retry: 1
+      });
+      locationDetails.value = response;
+    } catch (error) {
+      console.error('Failed to fetch location details:', error);
+    } finally {
+      detailsLoading.value = false;
+    }
+  }
 
   async function fetchLocationHistory(locationId: number): Promise<LocationHistoryData> {
-    loading.value = true;
+    historyLoading.value = true;
     const { start, end } = getDateRangeFromToday(
       generalConfigStore.selectedHistoryPeriod.unit,
       generalConfigStore.selectedHistoryPeriod.count
@@ -180,7 +217,7 @@ Location
       console.error('Failed to fetch location history:', error);
       return null;
     } finally {
-      loading.value = false;
+      historyLoading.value = false;
     }
   }
 
@@ -192,18 +229,30 @@ Location
     fetchLocationHistory(mapLocationData.value.locationId);
   }
 
+  onMounted(() => {
+    mapLocationData.value = props.dialog?.data.location;
+    if (mapLocationData.value) {
+      fetchLocationHistory(mapLocationData.value.locationId);
+      fetchLocationDetails(mapLocationData.value.locationId);
+    }
+  });
+
   watch(locationHistoryData, (newData: LocationHistoryData) => {
     if (newData && newData.data) {
-      const { chartData: data } = useChartjsData({
+      const { chartData: data, chartValues } = useChartjsData({
         data: newData.data,
         measure: generalConfigStore.selectedMeasure
       });
       chartData.value = data;
 
+      const annotations = useChartJsAnnotations({
+        data: chartValues
+      });
+
       chartOptions.value = useChartjsOptions({
         measure: generalConfigStore.selectedMeasure,
         animated: true,
-        annotations: []
+        annotations
       });
     }
   });
@@ -219,7 +268,7 @@ Location
   }
 
   .period-control {
-    max-width: 200px;
+    max-width: 165px;
   }
 
   .current-values {
@@ -230,13 +279,14 @@ Location
     justify-content: center;
   }
 
-  .main-current-value {
-    padding-right: 15px;
+  .measure-label {
+    padding-right: 5px;
+    margin-right: 5px;
     border-right: 1px solid var(--main-text-color);
+  }
 
-    &.text-light {
-      border-right: 1px solid var(--main-white-color);
-    }
+  .text-light .measure-label {
+    border-right: 1px solid var(--main-white-color);
   }
 
   .text-dark .measure-icon {

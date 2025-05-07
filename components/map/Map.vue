@@ -128,32 +128,8 @@
 
     const marker = L.marker(latlng, { icon });
 
-    // if (isSensor && feature.properties) {
-    //   const locationName: string = feature.properties.locationName || 'Unknown Location';
-    //   const tooltipContent = `
-    //   <div class="marker-tooltip">
-    //     <div class="tooltip-header">${locationName}</div>
-    //     <div class="tooltip-content">
-    //       <div class="measurement">
-    //         <span class="value">${Math.round(displayValue)}</span>
-    //         <span class="unit">${generalConfigStore.selectedMeasure === MeasureNames.PM25 ? 'PM2.5 μg/m³' : 'US AQI (PM2.5)'}</span>
-    //       </div>
-    //     </div>
-    //   </div>
-    // `;
-
-    //   marker.bindTooltip(tooltipContent, {
-    //     direction: 'top',
-    //     offset: L.point(0, -12),
-    //     opacity: 1,
-    //     permanent: false,
-    //     className: 'ag-marker-tooltip'
-    //   });
-    // }
-
     marker.on('click', () => {
       if (isSensor && feature.properties) {
-        console.log(feature.properties);
         dialogStore.open(locationHistoryDialogId, { location: feature.properties });
       } else if (!isSensor) {
         const currentZoom = mapInstance.getZoom();

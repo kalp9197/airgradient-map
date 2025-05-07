@@ -3,58 +3,26 @@ import { HistoryPeriod, HistoryBucket, HistoryPeriodUnit, HistoryPeriodConfig } 
 export const HISTORY_PERIODS: HistoryPeriodConfig[] = [
   {
     unit: HistoryPeriodUnit.HOUR,
-    count: 12,
-    label: 'Last 12 Hours',
-    defaultBucketSize: HistoryBucket.MINUTES_15,
-    value: HistoryPeriod['12_hours'],
-    chartUnit: HistoryPeriodUnit.HOUR
-  },
-  {
-    unit: HistoryPeriodUnit.HOUR,
     count: 24,
     label: 'Last 24 Hours',
     defaultBucketSize: HistoryBucket.MINUTES_15,
-    value: HistoryPeriod['24_hours'],
-    chartUnit: HistoryPeriodUnit.HOUR
-  },
-  {
-    unit: HistoryPeriodUnit.DAY,
-    count: 2,
-    label: 'Last 2 Days',
-    defaultBucketSize: HistoryBucket.HOUR,
-    value: HistoryPeriod['2_days'],
+    value: HistoryPeriod.DAY,
     chartUnit: HistoryPeriodUnit.HOUR
   },
   {
     unit: HistoryPeriodUnit.DAY,
     count: 7,
-    label: 'Last 7 Days',
+    label: 'Last Week',
     defaultBucketSize: HistoryBucket.HOUR,
-    value: HistoryPeriod['7_days'],
+    value: HistoryPeriod.WEEK,
     chartUnit: HistoryPeriodUnit.HOUR
   },
   {
-    unit: HistoryPeriodUnit.DAY,
-    count: 14,
-    label: 'Last 2 Weeks',
-    defaultBucketSize: HistoryBucket.HOUR,
-    value: HistoryPeriod['14_days'],
-    chartUnit: HistoryPeriodUnit.DAY
-  },
-  {
-    unit: HistoryPeriodUnit.DAY,
-    count: 30,
-    label: 'Last Month',
-    defaultBucketSize: HistoryBucket.HOUR,
-    value: HistoryPeriod['30_days'],
-    chartUnit: HistoryPeriodUnit.DAY
-  },
-  {
     unit: HistoryPeriodUnit.MONTH,
-    count: 2,
-    label: 'Last 2 Months',
-    defaultBucketSize: HistoryBucket.DAY,
-    value: HistoryPeriod['60_days'],
+    count: 1,
+    label: 'Last Month',
+    defaultBucketSize: HistoryBucket.HOUR_8,
+    value: HistoryPeriod.MONTH,
     chartUnit: HistoryPeriodUnit.DAY
   },
   {
@@ -62,7 +30,26 @@ export const HISTORY_PERIODS: HistoryPeriodConfig[] = [
     count: 3,
     label: 'Last 3 Months',
     defaultBucketSize: HistoryBucket.DAY,
-    value: HistoryPeriod['90_days'],
-    chartUnit: HistoryPeriodUnit.WEEK
+    value: HistoryPeriod.MONTHS_3,
+    chartUnit: HistoryPeriodUnit.DAY
   }
+
+  // Temporarily disabled
+
+  // {
+  //   unit: HistoryPeriodUnit.MONTH,
+  //   count: 6,
+  //   label: 'Last 6 Months',
+  //   defaultBucketSize: HistoryBucket.DAY,
+  //   value: HistoryPeriod.MONTHS_6,
+  //   chartUnit: HistoryPeriodUnit.DAY
+  // },
+  // {
+  //   unit: HistoryPeriodUnit.WEEK,
+  //   count: 52,
+  //   label: 'Last Year',
+  //   defaultBucketSize: HistoryBucket.WEEK,
+  //   value: HistoryPeriod.YEAR,
+  //   chartUnit: HistoryPeriodUnit.WEEK
+  // }
 ];

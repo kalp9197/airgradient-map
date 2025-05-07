@@ -30,6 +30,7 @@ module.exports = [
     },
     rules: {
       ...vue.configs.recommended.rules,
+      'vue/no-v-html': 'off',
     },
   },
   {
