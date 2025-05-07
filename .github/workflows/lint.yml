@@ -10,22 +10,24 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '22' # Needs to manually be updated
+        node-version: '22'
+        cache: 'npm'
 
     - name: Install dependencies
-      env:
-        npm_config_platform: linux
-        npm_config_arch: x64
       run: |
-        npm install --ignore-scripts
-        npm rebuild oxc-parser
-        npx nuxt prepare
+        npm ci
+      env:
+        npm_config_target_platform: 'linux'
+        npm_config_target_arch: 'x64'
+        npm_config_loglevel: 'verbose'
+
+    - name: Prepare Nuxt
+      run: npx nuxt prepare
 
     - name: Run ESLint
-      run: |
-        npm run lint
+      run: npm run lint
