@@ -10,16 +10,17 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v2
 
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '22' 
-        cache: 'npm'
+        node-version: '22' # Needs to manually be updated
 
-    - name: Install dependencies (skip scripts)
-      run: npm ci --ignore-scripts --no-optional
+    - name: Install dependencies
+      run: |
+        npm install
 
     - name: Run ESLint
-      run: npm run lint
+      run: |
+        npm run lint
