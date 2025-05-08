@@ -12,7 +12,7 @@ on:
 
 jobs:
   build:
-    name: Build Nuxt Static Site
+    name: Build Nuxt Site
     runs-on: ubuntu-latest
 
     strategy:
@@ -35,8 +35,10 @@ jobs:
       - name: Build site
         run: npm run build
 
-      - name: Upload dist folder
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: nuxt-dist
-          path: .output/public
+          name: nuxt-ssr-build
+          path: |
+            .output/public
+            .output/server
