@@ -86,6 +86,8 @@ class MeasurementRepository {
                         coordinate,
                         ST_MakeEnvelope($1, $2, $3, $4, 3857)
                     )
+                AND
+                    m.measured_at  >= NOW() - INTERVAL '6 hours'
                 GROUP BY 
                     l.id
             )
