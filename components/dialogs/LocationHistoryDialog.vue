@@ -58,15 +58,9 @@ Location
         </div>
       </ClientOnly>
       <p style="height: 20px" class="mb-0 mt-4">
-        <small v-if="chartOptions && locationDetails?.ownerNameDisplay"> Contributor: 
-          <span v-if="!locationDetails?.url">
-            {{ locationDetails?.ownerNameDisplay }} 
-          </span>
-          <span v-else>
-            <a :href="locationDetails?.url" target="_blank">
-              {{ locationDetails?.ownerNameDisplay }} 
-            </a>
-          </span>
+        <small v-if="chartOptions && locationDetails?.ownerNameDisplay">
+          Contributor:
+          <span> Contributor Name Here </span>
         </small>
       </p>
     </template>

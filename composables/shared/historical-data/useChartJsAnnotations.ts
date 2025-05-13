@@ -7,7 +7,6 @@ import { HistoryPeriodConfig, MeasureNames } from '~/types';
 import { getChartFontSize, getCO2Color, getPM25Color } from '~/utils';
 import { pm25ToAQI } from '~/utils/aqi';
 
-
 export function useChartJsAnnotations({
   data,
   showWHO = true,
@@ -78,7 +77,10 @@ function getAveragesData(
   };
 }
 
-function getAnnotationLabelXAdjust(measure: string, width: number): {
+function getAnnotationLabelXAdjust(
+  measure: string,
+  width: number
+): {
   avgXAdjust: number;
   WHOXAdjust: number;
 } {
