@@ -11,8 +11,6 @@ class MeasurementRepository {
     limit: number = 100,
     measure?: string,
   ): Promise<Measurement[]> {
-    // TODO: How about offline, need to check if the last measurement is already past the "offline" threshold?
-
     // Define measure type that are expected
     var measureSelectQuery: string = "";
     if (measure) {
@@ -28,7 +26,8 @@ class MeasurementRepository {
                     last(measured_at, measured_at) AS last_measured_at
                 FROM 
                     measurement
-                GROUP BY 
+                WHERE measured_at  >= NOW() - INTERVAL '6 hours'
+                GROUP BY
                     location_id
             )
             SELECT 
@@ -122,4 +121,3 @@ class MeasurementRepository {
 }
 
 export default MeasurementRepository;
-
