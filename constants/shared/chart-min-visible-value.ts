@@ -1,0 +1,1 @@
+export const CHART_MIN_VISIBLE_VALUE = 0.2222222;

@@ -16,9 +16,9 @@
         >
         </UiIconButton>
       </div>
-      <v-card-title v-if="$slots.header">
+      <div v-if="$slots.header">
         <slot name="header" />
-      </v-card-title>
+      </div>
       <v-card-title v-else>
         <h4 class="text-center p-2 mb-0">{{ title }}</h4>
       </v-card-title>

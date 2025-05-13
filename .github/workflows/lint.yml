@@ -19,7 +19,10 @@ jobs:
 
     - name: Install dependencies
       run: |
-        npm install
+         rm -rf node_modules package-lock.json
+         npm install --ignore-scripts
+         npm install @rollup/rollup-linux-x64-gnu
+         npx nuxt prepare
 
     - name: Run ESLint
       run: |

@@ -5,8 +5,8 @@ export default defineNuxtConfig({
     public: {
       apiUrl:
         process.env.NODE_ENV === 'production'
-          ? 'https://map-data-int.airgradient.com/map/api'
-          : 'https://map-data-int.airgradient.com/map/api'
+          ? 'https://map-data-int.airgradient.com/map/api/v1'
+          : 'https://map-data-int.airgradient.com/map/api/v1'
     }
   },
   css: [

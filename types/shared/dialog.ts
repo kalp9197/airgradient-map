@@ -1,9 +1,9 @@
-export interface DialogInstance {
+export interface DialogInstance<T = unknown> {
   dialogId: DialogId;
   isOpen: boolean;
-  data: unknown;
+  data: T;
 }
 
 export enum DialogId {
-  SAMPLE = 'sample'
+  LOCATION_HISTORY_CHART = 'location-history-chart'
 }
