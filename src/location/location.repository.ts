@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import DatabaseService from "src/database/database.service";
 import LocationEntity from "./location.entity";
+import { MeasureType } from "src/utils/measureTypeQuery";
+import { getMeasureValidValueRange } from "src/utils/measureValueValidation";
 
 @Injectable()
 class LocationRepository {
@@ -112,14 +114,16 @@ class LocationRepository {
     bucketSize: string,
     measure: string,
   ) {
+    const {minVal, maxVal} = getMeasureValidValueRange(measure as MeasureType);
     const query = `
-            SELECT 
+            SELECT
                 date_bin($4, m.measured_at, $2) AS timebucket,
                 round(avg(m.${measure})::NUMERIC , 2) AS value
             FROM measurement m 
             WHERE 
                 m.location_id = $1 AND 
-                m.measured_at BETWEEN $2 AND $3
+                m.measured_at BETWEEN $2 AND $3 AND
+                m.${measure} BETWEEN $5 AND $6
             GROUP BY timebucket
             ORDER BY timebucket;
         `;
@@ -129,6 +133,8 @@ class LocationRepository {
       start,
       end,
       bucketSize,
+      minVal,
+      maxVal,
     ]);
 
     return results.rows;
