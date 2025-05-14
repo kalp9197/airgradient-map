@@ -23,23 +23,19 @@ class DatabaseService {
     query: string,
     params?: unknown[],
   ) {
-    const queryPromise = source.query(query, params);
-
     // message without unnecessary spaces and newlines
     const message = this.getLogMessage(query, params)
       .replace(/\n|/g, "")
       .replace(/  +/g, " ");
 
-    queryPromise
-      .then(() => {
-        //this.logger.log(message);
-      })
-      .catch((error) => {
-        this.logger.warn(message);
-        throw error;
-      });
-
-    return queryPromise;
+    try {
+      const result = await source.query(query, params);
+      // this.logger.log(message);
+      return result;
+    } catch (error) {
+       this.logger.error(message);
+      throw error;
+    }
   }
 
   async getPoolClient() {
@@ -59,4 +55,3 @@ class DatabaseService {
 }
 
 export default DatabaseService;
-
