@@ -213,15 +213,18 @@ class TasksRepository {
   }
 
   async retrieveOpenAQLocationId(): Promise<{} | null> {
-    const result = await this.databaseService.runQuery(
-      `SELECT json_object_agg(reference_id::TEXT, id) FROM "location" WHERE data_source = 'OpenAQ';`,
-    );
-
-    if (result.rowCount === 0 || result.rows[0].json_object_agg === null) {
+    try {
+      const result = await this.databaseService.runQuery(
+        `SELECT json_object_agg(reference_id::TEXT, id) FROM "location" WHERE data_source = 'OpenAQ';`,
+      );
+      if (result.rowCount === 0 || result.rows[0].json_object_agg === null) {
+        return {};
+      }
+      return result.rows[0].json_object_agg;
+    } catch (error) {
+      this.logger.error(error);
       return {};
     }
-
-    return result.rows[0].json_object_agg;
   }
 
   async insertNewOpenAQLatest(latests: any[]) {

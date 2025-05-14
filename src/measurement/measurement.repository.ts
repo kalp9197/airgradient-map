@@ -1,10 +1,11 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
 import DatabaseService from "src/database/database.service";
 import Measurement from "./measurement.entity";
 
 @Injectable()
 class MeasurementRepository {
   constructor(private readonly databaseService: DatabaseService) {}
+  private readonly logger = new Logger(MeasurementRepository.name);
 
   async retrieveLatest(
     offset: number = 0,
@@ -49,11 +50,18 @@ class MeasurementRepository {
             OFFSET $1 LIMIT $2; 
         `;
 
-    const result = await this.databaseService.runQuery(query, [offset, limit]);
-
-    return result.rows.map(
-      (measurement: Partial<Measurement>) => new Measurement(measurement),
-    );
+    try {
+      const result = await this.databaseService.runQuery(query, [
+        offset,
+        limit,
+      ]);
+      return result.rows.map(
+        (measurement: Partial<Measurement>) => new Measurement(measurement),
+      );
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException("Error query latest measures");
+    }
   }
 
   async retrieveLatestByArea(
@@ -107,18 +115,23 @@ class MeasurementRepository {
                 location l ON m.location_id = l.id;
         `;
 
-    // Execute query with query params value
-    const result = await this.databaseService.runQuery(query, [
-      xMin,
-      yMin,
-      xMax,
-      yMax,
-    ]);
+    try {
+      // Execute query with query params value
+      const result = await this.databaseService.runQuery(query, [
+        xMin,
+        yMin,
+        xMax,
+        yMax,
+      ]);
 
-    // Return rows while map the result first to measurement entity
-    return result.rows.map(
-      (measurement: Partial<Measurement>) => new Measurement(measurement),
-    );
+      // Return rows while map the result first to measurement entity
+      return result.rows.map(
+        (measurement: Partial<Measurement>) => new Measurement(measurement),
+      );
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException("Error query latest measures by area");
+    }
   }
 }
 
