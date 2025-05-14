@@ -23,10 +23,11 @@
     >
     </LMap>
   </div>
+  <DialogsLocationHistoryDialog v-if="locationHistoryDialog" :dialog="locationHistoryDialog" />
 </template>
 
 <script lang="ts" setup>
-  import { ref } from 'vue';
+  import { computed, ref } from 'vue';
   import L, { DivIcon, GeoJSON, LatLngBounds, LatLngExpression } from 'leaflet';
   import 'leaflet/dist/leaflet.css';
   import '@maplibre/maplibre-gl-leaflet';
@@ -37,23 +38,37 @@
   import { GeoSearchControl, OpenStreetMapProvider } from 'leaflet-geosearch';
 
   import { convertToGeoJSON } from '~/utils/';
-  import { AGMapData, MeasureNames, AGMapDataItemType, SensorType, DropdownOption } from '~/types';
+  import {
+    AGMapData,
+    MeasureNames,
+    AGMapDataItemType,
+    SensorType,
+    DropdownOption,
+    DialogId
+  } from '~/types';
   import { getPM25Color, getAQIColor } from '~/utils/';
   import { INITIAL_MAP_VIEW_CONFIG } from '~/constants';
   import { pm25ToAQI } from '~/utils/aqi';
   import { useGeneralConfigStore } from '~/store/general-config-store';
+  import { dialogStore } from '~/composables/shared/ui/useDialog';
+  import { MEASURE_LABELS } from '~/constants/shared/measure-lables';
 
   const loading = ref<boolean>(false);
   const map = ref<typeof LMap>();
   const apiUrl = useRuntimeConfig().public.apiUrl;
   const generalConfigStore = useGeneralConfigStore();
+
+  const locationHistoryDialogId = DialogId.LOCATION_HISTORY_CHART;
+
+  const locationHistoryDialog = computed(() => dialogStore.getDialog(locationHistoryDialogId));
+
   const measureSelectOptions: DropdownOption[] = [
     {
-      label: 'PM2.5 (μg/m³)',
+      label: MEASURE_LABELS[MeasureNames.PM25],
       value: MeasureNames.PM25
     },
     {
-      label: 'US AQI (PM2.5)',
+      label: MEASURE_LABELS[MeasureNames.PM_AQI],
       value: MeasureNames.PM_AQI
     }
   ];
@@ -113,29 +128,10 @@
 
     const marker = L.marker(latlng, { icon });
 
-    if (isSensor && feature.properties) {
-      const locationName: string = feature.properties.locationName || 'Unknown Location';
-      const tooltipContent = `
-      <div class="marker-tooltip">
-        <div class="tooltip-header">${locationName}</div>
-        <div class="tooltip-content">
-          <div class="measurement">
-            <span class="value">${Math.round(displayValue)}</span>
-            <span class="unit">${generalConfigStore.selectedMeasure === MeasureNames.PM25 ? 'PM2.5 μg/m³' : 'US AQI (PM2.5)'}</span>
-          </div>
-        </div>
-      </div>
-    `;
-
-      marker.bindTooltip(tooltipContent, {
-        direction: 'top',
-        offset: L.point(0, -12),
-        opacity: 1,
-        permanent: false,
-        className: 'ag-marker-tooltip'
-      });
-    } else if (!isSensor) {
-      marker.on('click', () => {
+    marker.on('click', () => {
+      if (isSensor && feature.properties) {
+        dialogStore.open(locationHistoryDialogId, { location: feature.properties });
+      } else if (!isSensor) {
         const currentZoom = mapInstance.getZoom();
         const newZoom = Math.min(currentZoom + 2, INITIAL_MAP_VIEW_CONFIG.maxZoom);
 
@@ -143,21 +139,21 @@
           animate: true,
           duration: 0.8
         });
-      });
-    }
+      }
+    });
 
     return marker;
   }
 
   async function updateMap(): Promise<void> {
-    if (loading.value) {
+    if (loading.value || locationHistoryDialog.value?.isOpen) {
       return;
     }
     loading.value = true;
 
     try {
       const bounds: LatLngBounds = mapInstance.getBounds();
-      const response = await $fetch<AGMapData>(`${apiUrl}/v1/measurements/current/cluster`, {
+      const response = await $fetch<AGMapData>(`${apiUrl}/measurements/current/cluster`, {
         params: {
           xmin: bounds.getSouth(),
           ymin: bounds.getWest(),

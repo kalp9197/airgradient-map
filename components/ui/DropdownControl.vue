@@ -39,7 +39,7 @@
      */
     size: {
       type: String as PropType<DropdownSize>,
-      default: DropdownSize.NORMAL
+      default: DropdownSize.SMALL
     },
     /**
      * Whether the dropdown is disabled.
