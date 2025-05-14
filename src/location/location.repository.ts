@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import DatabaseService from "src/database/database.service";
 import LocationEntity from "./location.entity";
 import { MeasureType } from "src/utils/measureTypeQuery";
-import * as Constants from "../constants"
+import { getMeasureValidValueRange } from "src/utils/measureValueValidation";
 
 @Injectable()
 class LocationRepository {
@@ -114,31 +114,7 @@ class LocationRepository {
     bucketSize: string,
     measure: string,
   ) {
-    const typedMeasure = measure as MeasureType;
-    var minVal = 0;
-    var maxVal = 0;
-    switch (typedMeasure) {
-      case MeasureType.PM25:
-        minVal = Constants.VALID_PM25_MIN;
-        maxVal = Constants.VALID_PM25_MAX;
-        break;
-      case MeasureType.RCO2:
-        minVal = Constants.VALID_CO2_MIN;
-        maxVal = Constants.VALID_CO2_MAX;
-        break;
-      case MeasureType.ATMP:
-        minVal = Constants.VALID_TEMPERATURE_MIN;
-        maxVal = Constants.VALID_TEMPERATURE_MAX;
-        break;
-      case MeasureType.RHUM:
-        minVal = Constants.VALID_HUMIDITY_MIN;
-        maxVal = Constants.VALID_HUMIDITY_MAX;
-        break;
-      default:
-        // NOTE: Add another type
-        break;
-    }
-
+    const {minVal, maxVal} = getMeasureValidValueRange(measure as MeasureType);
     const query = `
             SELECT
                 date_bin($4, m.measured_at, $2) AS timebucket,
