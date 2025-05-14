@@ -16,6 +16,10 @@ AirGradient Map is a web application for visualizing and analyzing air quality d
 The old app’s tech stack can’t scale to meet our requirements, so we’ve built this new codebase. First, we’ll migrate all existing features here; once that’s done, we’ll layer on new enhancements and capabilities.
 
 
+
+💬 **Join the Discussion on Discord**
+Have questions or want to share feedback? Join our community on [Discord](https://discord.gg/5u2C5T33) to chat, ask questions, and collaborate with other contributors!
+
 ## Development Setup
 
 There are two ways to run the application locally: using Docker (recommended) or directly with Node.js.
