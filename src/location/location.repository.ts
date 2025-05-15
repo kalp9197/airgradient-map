@@ -173,7 +173,7 @@ class LocationRepository {
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException(
-        "Error query measures history of specific location by id",
+        `Error query measures history of specific location by id (${error.message})`
       );
     }
   }
