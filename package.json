@@ -8,6 +8,7 @@
   "scripts": {
     "build": "nuxt build",
     "build:static": "nuxt generate",
+    "prepare": "nuxt prepare",
     "build:capacitor": "NODE_ENV=production NUXT_PUBLIC_MOBILE=true nuxt generate && npx cap sync",
     "build:ios": "npm run build:capacitor && npx cap open ios",
     "build:android": "npm run build:capacitor && npx cap open android",
