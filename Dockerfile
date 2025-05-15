@@ -2,7 +2,11 @@ FROM node:22-alpine AS build
 WORKDIR /app
 
 COPY package.json package-lock.json .npmrc ./
-RUN npm ci
+
+RUN npm install --ignore-scripts \
+  && npm install @rollup/rollup-linux-x64-musl \
+  && npm rebuild \
+  && npm run prepare
 
 COPY . .
 
