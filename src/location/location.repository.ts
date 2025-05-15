@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException,
+} from "@nestjs/common";
 import DatabaseService from "src/database/database.service";
 import LocationEntity from "./location.entity";
 import { MeasureType } from "src/utils/measureTypeQuery";
@@ -7,6 +12,7 @@ import { getMeasureValidValueRange } from "src/utils/measureValueValidation";
 @Injectable()
 class LocationRepository {
   constructor(private readonly databaseService: DatabaseService) {}
+  private readonly logger = new Logger(LocationRepository.name);
 
   async retrieveLocations(
     offset: number = 0,
@@ -37,11 +43,21 @@ class LocationRepository {
             OFFSET $1 LIMIT $2; 
         `;
 
-    const results = await this.databaseService.runQuery(query, [offset, limit]);
+    try {
+      const results = await this.databaseService.runQuery(query, [
+        offset,
+        limit,
+      ]);
 
-    return results.rows.map(
-      (location: Partial<LocationEntity>) => new LocationEntity(location),
-    );
+      return results.rows.map(
+        (location: Partial<LocationEntity>) => new LocationEntity(location),
+      );
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException(
+        "Error query locations information",
+      );
+    }
   }
 
   async retrieveLocationById(id: number): Promise<LocationEntity> {
@@ -69,14 +85,21 @@ class LocationRepository {
                 l.id = $1;
         `;
 
-    const result = await this.databaseService.runQuery(query, [id]);
+    try {
+      const result = await this.databaseService.runQuery(query, [id]);
 
-    const location = result.rows[0];
-    if (!location) {
-      throw new NotFoundException();
+      const location = result.rows[0];
+      if (!location) {
+        throw new NotFoundException();
+      }
+
+      return new LocationEntity(location);
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException(
+        "Error query location information by id",
+      );
     }
-
-    return new LocationEntity(location);
   }
 
   async retrieveLastMeasuresByLocationId(id: number) {
@@ -97,14 +120,20 @@ class LocationRepository {
             LIMIT 1;
         `;
 
-    const result = await this.databaseService.runQuery(query, [id]);
+    try {
+      const result = await this.databaseService.runQuery(query, [id]);
 
-    const lastMeasurements = result.rows[0];
-    if (!lastMeasurements) {
-      throw new NotFoundException();
+      const lastMeasurements = result.rows[0];
+      if (!lastMeasurements) {
+        throw new NotFoundException();
+      }
+      return lastMeasurements;
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException(
+        "Error query last measures of specific location by id",
+      );
     }
-
-    return lastMeasurements;
   }
 
   async retrieveLocationMeasuresHistory(
@@ -114,7 +143,9 @@ class LocationRepository {
     bucketSize: string,
     measure: string,
   ) {
-    const {minVal, maxVal} = getMeasureValidValueRange(measure as MeasureType);
+    const { minVal, maxVal } = getMeasureValidValueRange(
+      measure as MeasureType,
+    );
     const query = `
             SELECT
                 date_bin($4, m.measured_at, $2) AS timebucket,
@@ -128,16 +159,23 @@ class LocationRepository {
             ORDER BY timebucket;
         `;
 
-    const results = await this.databaseService.runQuery(query, [
-      id,
-      start,
-      end,
-      bucketSize,
-      minVal,
-      maxVal,
-    ]);
+    try {
+      const results = await this.databaseService.runQuery(query, [
+        id,
+        start,
+        end,
+        bucketSize,
+        minVal,
+        maxVal,
+      ]);
 
-    return results.rows;
+      return results.rows;
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException(
+        `Error query measures history of specific location by id (${error.message})`
+      );
+    }
   }
 }
 

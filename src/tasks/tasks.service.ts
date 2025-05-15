@@ -36,12 +36,13 @@ export class TasksService {
     const data = await this.http.fetch<AirgradientModel[]>(url);
     this.logger.debug("Total data: " + data.length);
 
-    await this.tasksRepository.insertAg(data);
-
-    const duration = Date.now() - start;
-    this.logger.debug(
-      `Successfully insert new airgradient latest measures. Time spend ${duration}ms`,
-    );
+    const success = await this.tasksRepository.insertAg(data);
+    if (success) {
+      const duration = Date.now() - start;
+      this.logger.debug(
+        `Successfully insert new airgradient latest measures. Time spend ${duration}ms`,
+      );
+    } 
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)

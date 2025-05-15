@@ -56,7 +56,7 @@ export class LocationController {
     @ApiPaginatedResponse(
         TimeseriesDto,
         "Retrieve history measures of a location based on range of timestamp",
-        "start and end query format is \"yyyy-mm-dd hh:mm\" or \"yyyy-mm-dd\"; bucketsize query follow ISO 8601 interval format"
+        "start and end query format is \"yyyy-mm-dd hh:mm\" or \"yyyy-mm-dd\"; bucketsize query follow ISO 8601 duration format"
     )
     @UsePipes(new ValidationPipe({ transform: true }))
     async getmeasuresHistoryByLocationIdl(

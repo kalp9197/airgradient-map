@@ -35,9 +35,7 @@ class TasksRepository {
       ownerId = result.rows[0].id;
     } catch (error) {
       this.logger.error(error);
-      throw new InternalServerErrorException(
-        "Failed when retrieve airgradient owner_id",
-      );
+      return false;
     }
 
     this.logger.debug(`Airgradient owner_id is ${ownerId}`);
@@ -108,10 +106,12 @@ class TasksRepository {
         await this.databaseService.runQuery(measurementQuery);
         await this.databaseService.runQuery("COMMIT");
       }
+
+      return true;
     } catch (error) {
       await this.databaseService.runQuery("ROLLBACK");
       this.logger.error(error);
-      return new InternalServerErrorException("Airgradient cron query failed");
+      return false;
     }
   }
 
@@ -206,22 +206,22 @@ class TasksRepository {
       await this.databaseService.runQuery(query);
     } catch (error) {
       this.logger.error(error);
-      return new InternalServerErrorException(
-        "OpenAQ cron sync location failed",
-      );
     }
   }
 
   async retrieveOpenAQLocationId(): Promise<{} | null> {
-    const result = await this.databaseService.runQuery(
-      `SELECT json_object_agg(reference_id::TEXT, id) FROM "location" WHERE data_source = 'OpenAQ';`,
-    );
-
-    if (result.rowCount === 0 || result.rows[0].json_object_agg === null) {
+    try {
+      const result = await this.databaseService.runQuery(
+        `SELECT json_object_agg(reference_id::TEXT, id) FROM "location" WHERE data_source = 'OpenAQ';`,
+      );
+      if (result.rowCount === 0 || result.rows[0].json_object_agg === null) {
+        return {};
+      }
+      return result.rows[0].json_object_agg;
+    } catch (error) {
+      this.logger.error(error);
       return {};
     }
-
-    return result.rows[0].json_object_agg;
   }
 
   async insertNewOpenAQLatest(latests: any[]) {
@@ -242,7 +242,6 @@ class TasksRepository {
       await this.databaseService.runQuery(query);
     } catch (error) {
       this.logger.error(error);
-      return new InternalServerErrorException("OpenAQ cron new latest failed");
     }
   }
 }
