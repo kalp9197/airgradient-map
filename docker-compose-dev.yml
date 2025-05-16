@@ -1,0 +1,39 @@
+services:
+  postgrex:
+    container_name: postgrex
+    build:
+      context: tools/docker/db
+      dockerfile: Dockerfile
+      args:
+        - CRON_DATABASE_NAME=${DATABASE_NAME}
+    ports:
+      - 5432:5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_DB=${DATABASE_NAME}
+      - POSTGRES_USER=${DATABASE_USER}
+    networks:
+      - dev
+
+  mapapi:
+    container_name: mapapi
+    build:
+      dockerfile: tools/docker/Dockerfile
+    command: npm run start:dev
+    ports:
+      - 3000:3000
+    volumes:
+      - ./src:/app/src
+    networks:
+      - dev
+    depends_on:
+      - postgrex
+
+networks:
+  dev:
+    driver: bridge
+
+volumes:
+  pgdata:
