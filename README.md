@@ -43,54 +43,25 @@ Database is PostgreSQL with 2 extensions [PostGIS](https://postgis.net/) and [pg
 
 Prerequisite: Docker
 
-### Create Docker Internal Network
-
-Both services use the `dev` network
+Spin up both the database and api services from the root of the repository:
 
 ```sh
-docker network create dev
+docker compose --env-file .env.development -f docker-compose-dev.yml up [-d] [--build]
 ```
 
-### Setup Database
+This automatically builds and starts the necessary containers. When developing and changing source files, the api service automatically reloads the source files. Use the `--build` option when you change npm dependencies and need to rebuild the image. Optionally use the `-d` option for running detached in the background.
 
-Name of the database is `agmap`
+To stop the services, run:
 
-#### Build Database Image
-
-- Go to _tools/docker/db_
-
-```bash
-cd tools/docker/db
+```sh
+docker compose --env-file .env.development -f docker-compose-dev.yml down
 ```
 
-- Make sure script is executable
+### Configure env configuration 
 
-```bash
-chmod +x build.sh
-```
+From `.env.development` the only necessary thing needs to be changed is `API_KEY_OPENAQ` configuration. To get the key, please follow steps from OpenAQ [here](https://docs.openaq.org/using-the-api/api-key)
 
-- Build database image
-
-```bash
-./build.sh
-```
-
-#### Run Database Container
-
-- Go back to this project root path
-- Make sure script is executable
-
-```bash
-chmod +x ./tools/docker/db/run.sh
-```
-
-- Run db container 
-
-```bash
-./tools/docker/db/run.sh
-```
-
-#### Seed Data to the Database
+### Seed Data to the Database
 
 - Download database dump from [here](https://drive.google.com/drive/folders/1DU66VaaAoA4704MBNQtk9irZ0QVrO1kO?usp=sharing)
 - Copy db dump to db container
@@ -118,30 +89,6 @@ Expected Result
 -------
   9215
 (1 row)
-```
-
-### Setup Backend Service
-
-#### Configure env configuration 
-
-From `.env.development` the only necessary thing needs to be changed is `API_KEY_OPENAQ` configuration. To get the key, please follow steps from OpenAQ [here](https://docs.openaq.org/using-the-api/api-key)
-
-#### Run Service Container
-
-- Build image
-
-```sh
-docker build --no-cache -t mapapi:latest -f ./tools/docker/Dockerfile .
-```
-
-- Run service
-
-```bash
-docker run --name mapapi \
-    -v $(pwd)/src:/app/src \
-    -v $(pwd)/.env.development:/app/.env.development \
-    --network dev -p 3000:3000 \
-    -d mapapi:latest
 ```
 
 ## License

@@ -10,4 +10,3 @@ COPY . .
 # First build and run with dev tag
 ## TODO: prod options to run
 RUN npm run build
-CMD [ "npm", "run", "start:dev" ]
