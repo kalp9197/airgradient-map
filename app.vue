@@ -2,20 +2,14 @@
   <Transition name="layout" mode="out-in">
     <div>
       <NuxtLayout>
-        <Transition name="page" mode="out-in">
-          <div :key="$route.fullPath">
             <NuxtPage />
-          </div>
-        </Transition>
       </NuxtLayout>
     </div>
   </Transition>
 </template>
 <script lang="ts" setup>
   import { getPlatform, isNativeApp } from '~/utils';
-  import { useHead, useRoute } from 'nuxt/app';
-
-  const $route = useRoute();
+  import { useHead } from 'nuxt/app';
 
   useHead({
     title: 'AirGradient Map'
