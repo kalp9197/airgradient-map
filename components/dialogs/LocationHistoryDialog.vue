@@ -90,7 +90,7 @@ Location
   import { useChartjsData } from '~/composables/shared/historical-data/useChartJsData';
   import { MEASURE_LABELS_SUBSCRIPTS } from '~/constants/shared/measure-lables';
   import { pm25ToAQI } from '~/utils/aqi';
-  import { getAQIColor, getPM25Color } from '~/utils';
+  import { getAQIColor, getCO2Color, getPM25Color } from '~/utils';
   import { MEASURE_UNITS } from '~/constants/shared/measure-units';
   import { useChartJsAnnotations } from '~/composables/shared/historical-data/useChartJsAnnotations';
 
@@ -133,12 +133,17 @@ Location
     };
 
     let value = Number.parseFloat(mostRecentData.value);
-
-    if (generalConfigStore.selectedMeasure === MeasureNames.PM_AQI) {
-      value = pm25ToAQI(value);
-      colorConfig = getAQIColor(value);
-    } else {
-      colorConfig = getPM25Color(value);
+    switch (generalConfigStore.selectedMeasure) {
+      case MeasureNames.PM_AQI:
+        value = pm25ToAQI(value);
+        colorConfig = getAQIColor(value);
+        break;
+      case MeasureNames.CO2:
+        colorConfig = getCO2Color(value);
+        break;
+      default:
+        colorConfig = getPM25Color(value);
+        break;
     }
 
     return {
