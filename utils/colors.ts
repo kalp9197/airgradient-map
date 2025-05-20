@@ -1,5 +1,5 @@
 import { CHART_COLORS_CSS_VARS, CHART_COLORS_DARKENED_CSS_VARS } from '~/constants/shared/colors';
-import { ChartColorsType } from '~/types';
+import { ChartColorsType, MeasureNames } from '~/types';
 
 /**
  * Gets the color representation for PM2.5 values.
@@ -113,4 +113,31 @@ export function getAQIColor(aqi: number): { bgColor: string; textColorClass: str
     bgColor: CHART_COLORS_CSS_VARS[color],
     textColorClass: getTextColorClassForBG(color)
   };
+}
+
+/**
+ * Gets the color for a given measure and value
+ *
+ * @param {MeasureNames} measure - The measure to get the color for
+ * @param {number} value - The value to get the color for
+ * @param {boolean} [dark=false] - Whether to use dark mode colors
+ * @returns {{ bgColor: string; textColor: string }} Object containing background and text colors
+ *   - bgColor: CSS color value for the background
+ *   - textColorClass: CSS color class for the text that ensures readability
+ */
+export function getColorForMeasure(
+  measure: MeasureNames,
+  value: number,
+  dark = false
+): { bgColor: string; textColorClass: string } {
+  switch (measure) {
+    case MeasureNames.PM25:
+      return getPM25Color(value, dark);
+    case MeasureNames.CO2:
+      return getCO2Color(value, dark);
+    case MeasureNames.PM_AQI:
+      return getAQIColor(value);
+    default:
+      return { bgColor: '', textColorClass: '' };
+  }
 }

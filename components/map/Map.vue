@@ -46,13 +46,14 @@
     DropdownOption,
     DialogId
   } from '~/types';
-  import { getPM25Color, getAQIColor } from '~/utils/';
   import { DEFAULT_MAP_VIEW_CONFIG } from '~/constants';
+  import { useUrlState } from '~/composables/shared/ui/useUrlState';
+  import { getColorForMeasure } from '~/utils/colors';
   import { pm25ToAQI } from '~/utils/aqi';
   import { useGeneralConfigStore } from '~/store/general-config-store';
   import { dialogStore } from '~/composables/shared/ui/useDialog';
-  import { MEASURE_LABELS } from '~/constants/shared/measure-lables';
-  import { useUrlState } from '~/composables/shared/ui/useUrlState';
+  import { MEASURE_LABELS_WITH_UNITS } from '~/constants/shared/measure-lables';
+
   const loading = ref<boolean>(false);
   const map = ref<typeof LMap>();
   const apiUrl = useRuntimeConfig().public.apiUrl;
@@ -66,12 +67,16 @@
 
   const measureSelectOptions: DropdownOption[] = [
     {
-      label: MEASURE_LABELS[MeasureNames.PM25],
+      label: MEASURE_LABELS_WITH_UNITS[MeasureNames.PM25],
       value: MeasureNames.PM25
     },
     {
-      label: MEASURE_LABELS[MeasureNames.PM_AQI],
+      label: MEASURE_LABELS_WITH_UNITS[MeasureNames.PM_AQI],
       value: MeasureNames.PM_AQI
+    },
+    {
+      label: MEASURE_LABELS_WITH_UNITS[MeasureNames.CO2],
+      value: MeasureNames.CO2
     }
   ];
 
@@ -106,15 +111,18 @@
   }
 
   function createMarker(feature: GeoJSON.Feature, latlng: LatLngExpression): L.Marker {
-    const pm25Value: number = feature.properties?.value || 0;
-    const aqiValue: number = pm25ToAQI(pm25Value);
+    let displayValue: number = feature.properties?.value;
+    if (
+      (displayValue || displayValue === 0) &&
+      generalConfigStore.selectedMeasure === MeasureNames.PM_AQI
+    ) {
+      displayValue = pm25ToAQI(displayValue);
+    }
 
-    const displayValue =
-      generalConfigStore.selectedMeasure === MeasureNames.PM25 ? pm25Value : aqiValue;
-    const colorConfig: { bgColor: string; textColorClass: string } =
-      generalConfigStore.selectedMeasure === MeasureNames.PM25
-        ? getPM25Color(pm25Value)
-        : getAQIColor(aqiValue);
+    const colorConfig: { bgColor: string; textColorClass: string } = getColorForMeasure(
+      generalConfigStore.selectedMeasure,
+      displayValue
+    );
 
     const isSensor: boolean = feature.properties?.type === AGMapDataItemType.sensor;
     const isReference: boolean = feature.properties?.sensorType === SensorType.reference;
@@ -170,7 +178,10 @@
           xmax: bounds.getNorth(),
           ymax: bounds.getEast(),
           zoom: mapInstance.getZoom(),
-          measure: MeasureNames.PM25
+          measure:
+            generalConfigStore.selectedMeasure === MeasureNames.PM_AQI
+              ? MeasureNames.PM25
+              : generalConfigStore.selectedMeasure
         },
         retry: 1
       });
@@ -200,12 +211,22 @@
   }
 
   function handleMeasureChange(value: MeasureNames): void {
+    const previousMeasure = generalConfigStore.selectedMeasure;
     useGeneralConfigStore().setSelectedMeasure(value);
-    markers.clearLayers();
-    markers.addData(geoJsonMapData);
     setUrlState({
       meas: value
     });
+
+    if (
+      [MeasureNames.PM25, MeasureNames.PM_AQI].includes(previousMeasure) &&
+      [MeasureNames.PM25, MeasureNames.PM_AQI].includes(value)
+    ) {
+      markers.clearLayers();
+      markers.addData(geoJsonMapData);
+    } else {
+      updateMap();
+    }
+
   }
 </script>
 
