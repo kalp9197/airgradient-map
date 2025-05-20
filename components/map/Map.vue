@@ -13,12 +13,12 @@
     <LMap
       ref="map"
       class="map"
-      :maxBoundsViscosity="INITIAL_MAP_VIEW_CONFIG.maxBoundsViscosity"
-      :maxBounds="INITIAL_MAP_VIEW_CONFIG.maxBounds"
-      :zoom="INITIAL_MAP_VIEW_CONFIG.zoom"
-      :max-zoom="INITIAL_MAP_VIEW_CONFIG.maxZoom"
-      :min-zoom="INITIAL_MAP_VIEW_CONFIG.minZoom"
-      :center="INITIAL_MAP_VIEW_CONFIG.center"
+      :maxBoundsViscosity="DEFAULT_MAP_VIEW_CONFIG.maxBoundsViscosity"
+      :maxBounds="DEFAULT_MAP_VIEW_CONFIG.maxBounds"
+      :zoom="Number(urlState.zoom)"
+      :max-zoom="DEFAULT_MAP_VIEW_CONFIG.maxZoom"
+      :min-zoom="DEFAULT_MAP_VIEW_CONFIG.minZoom"
+      :center="[Number(urlState.lat), Number(urlState.long)]"
       @ready="onMapReady"
     >
     </LMap>
@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { computed, ref } from 'vue';
+  import { computed, onMounted, ref } from 'vue';
   import L, { DivIcon, GeoJSON, LatLngBounds, LatLngExpression } from 'leaflet';
   import 'leaflet/dist/leaflet.css';
   import '@maplibre/maplibre-gl-leaflet';
@@ -46,8 +46,9 @@
     DropdownOption,
     DialogId
   } from '~/types';
+  import { DEFAULT_MAP_VIEW_CONFIG } from '~/constants';
+  import { useUrlState } from '~/composables/shared/ui/useUrlState';
   import { getColorForMeasure } from '~/utils/colors';
-  import { INITIAL_MAP_VIEW_CONFIG } from '~/constants';
   import { pm25ToAQI } from '~/utils/aqi';
   import { useGeneralConfigStore } from '~/store/general-config-store';
   import { dialogStore } from '~/composables/shared/ui/useDialog';
@@ -59,6 +60,8 @@
   const generalConfigStore = useGeneralConfigStore();
 
   const locationHistoryDialogId = DialogId.LOCATION_HISTORY_CHART;
+
+  const { urlState, setUrlState } = useUrlState();
 
   const locationHistoryDialog = computed(() => dialogStore.getDialog(locationHistoryDialogId));
 
@@ -94,7 +97,9 @@
     mapInstance = map.value.leafletObject;
 
     L.maplibreGL({
-      style: 'https://tiles.openfreemap.org/styles/liberty'
+      style: 'https://tiles.openfreemap.org/styles/liberty',
+      center: [Number(urlState.lat), Number(urlState.long)],
+      zoom: Number(urlState.zoom)
     }).addTo(mapInstance);
 
     markers = L.geoJson(null, {
@@ -140,7 +145,7 @@
         dialogStore.open(locationHistoryDialogId, { location: feature.properties });
       } else if (!isSensor) {
         const currentZoom = mapInstance.getZoom();
-        const newZoom = Math.min(currentZoom + 2, INITIAL_MAP_VIEW_CONFIG.maxZoom);
+        const newZoom = Math.min(currentZoom + 2, DEFAULT_MAP_VIEW_CONFIG.maxZoom);
 
         mapInstance.flyTo(latlng, newZoom, {
           animate: true,
@@ -157,6 +162,12 @@
       return;
     }
     loading.value = true;
+
+    setUrlState({
+      zoom: mapInstance.getZoom(),
+      lat: mapInstance.getCenter().lat.toFixed(2),
+      long: mapInstance.getCenter().lng.toFixed(2)
+    });
 
     try {
       const bounds: LatLngBounds = mapInstance.getBounds();
@@ -202,6 +213,10 @@
   function handleMeasureChange(value: MeasureNames): void {
     const previousMeasure = generalConfigStore.selectedMeasure;
     useGeneralConfigStore().setSelectedMeasure(value);
+    setUrlState({
+      meas: value
+    });
+
     if (
       [MeasureNames.PM25, MeasureNames.PM_AQI].includes(previousMeasure) &&
       [MeasureNames.PM25, MeasureNames.PM_AQI].includes(value)
@@ -212,6 +227,10 @@
       updateMap();
     }
   }
+
+  onMounted(() => {
+    useGeneralConfigStore().setSelectedMeasure(urlState.meas);
+  });
 </script>
 
 <style lang="scss">
