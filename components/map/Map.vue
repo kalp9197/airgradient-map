@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { computed, ref } from 'vue';
+  import { computed, onMounted, ref } from 'vue';
   import L, { DivIcon, GeoJSON, LatLngBounds, LatLngExpression } from 'leaflet';
   import 'leaflet/dist/leaflet.css';
   import '@maplibre/maplibre-gl-leaflet';
@@ -226,8 +226,11 @@
     } else {
       updateMap();
     }
-
   }
+
+  onMounted(() => {
+    useGeneralConfigStore().setSelectedMeasure(urlState.meas);
+  });
 </script>
 
 <style lang="scss">

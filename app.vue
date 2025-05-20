@@ -2,7 +2,7 @@
   <Transition name="layout" mode="out-in">
     <div>
       <NuxtLayout>
-            <NuxtPage />
+        <NuxtPage />
       </NuxtLayout>
     </div>
   </Transition>
