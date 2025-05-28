@@ -27,12 +27,6 @@ There are two ways to run the application locally: using Docker (recommended) or
 
 ### Option 1: Using Docker (Recommended)
 
-Note: If you are developing on Mac with an Apple Silicon chip, you should change in the Dockerfile
-```bash
-@rollup/rollup-linux-x64-musl ->  npm install rollup
-```
-to get the install running locally due to the different underlying chip architetcure.
-
 Prerequisites:
 - Docker
 - Docker Compose
