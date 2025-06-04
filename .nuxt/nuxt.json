@@ -1,0 +1,9 @@
+{
+  "_hash": "fAQKO64FJhct4RmVD2SBJGdnpu5OCXClivj9m96zfDY",
+  "project": {
+    "rootDir": "/app"
+  },
+  "versions": {
+    "nuxt": "3.16.1"
+  }
+}
