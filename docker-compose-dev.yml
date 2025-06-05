@@ -1,8 +1,9 @@
+# API
 services:
   postgrex:
-    container_name: postgrex
+    container_name: postgrex-mono
     build:
-      context: tools/docker/db
+      context: apps/api/tools/docker/db
       dockerfile: Dockerfile
       args:
         - CRON_DATABASE_NAME=${DATABASE_NAME}
@@ -18,18 +19,36 @@ services:
       - dev
 
   mapapi:
-    container_name: mapapi
+    container_name: mapapi-mono
     build:
+      context: apps/api
       dockerfile: tools/docker/Dockerfile
     command: npm run start:dev
     ports:
-      - 3000:3000
+      - 3001:3001
     volumes:
-      - ./src:/app/src
+      - ./apps/api/src:/app/src
     networks:
       - dev
     depends_on:
       - postgrex
+
+  app:
+    container_name: website-mono
+    build:
+      context: apps/website
+      target: build
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./apps/website:/app
+      - /app/node_modules
+      - ./apps/website/.nuxt:/app/.nuxt
+    command: npm run dev
+    environment:
+      - HOST=0.0.0.0
+      - PORT=3000
+      - NODE_ENV=development
 
 networks:
   dev:
@@ -37,3 +56,4 @@ networks:
 
 volumes:
   pgdata:
+
