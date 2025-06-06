@@ -21,171 +21,81 @@ The old app’s tech stack can’t scale to meet our requirements, so we’ve bu
 
 Have questions or want to share feedback? Join our community on [Discord](https://discord.gg/5u2C5T33) to chat, ask questions, and collaborate with other contributors!
 
-## Development Setup
+# AirGradient Map Monorepo - TMP README
 
-There are two ways to run the application locally: using Docker (recommended) or directly with Node.js.
+Please see here the new local setup steps. Will add another commit to finalize the real README, just sharing this for feedback and testing by others.
 
-### Option 1: Using Docker (Recommended)
-
-Prerequisites:
-- Docker
-- Docker Compose
-
-Both can be installed from: https://docs.docker.com/compose/install/
+## Local development
 
 1. **Clone the repository**:
+
 ```bash
 git clone https://github.com/airgradienthq/airgradient-map-web
 cd ag-map-client
 ```
 
-2. **Start the development server**:
+2. **Configure .env configuration**
 
-You can configure if your locally run web app calls the online running API backend or locally run version in the nuxt.config.ts file apiUrl section. Default is set to call locally if not deployed in production.
+You have an `.env.development.example` file in `apps/api`
 
-```bash
-docker-compose up
-```
+Make a copy next to it and name it `.env.development`
 
-The application will be available at `http://localhost:3000`
+From `.env.development` the only necessary thing needs to be changed is `API_KEY_OPENAQ` configuration. To get the key, please follow steps from OpenAQ [here](https://docs.openaq.org/using-the-api/api-key)
 
-To stop the server:
-```bash
-docker-compose down
-```
+3. **Run the containers**
 
-To rebuild the container after dependency changes:
-```bash
-docker-compose up --build
-```
+We have one docker compose file to build and run 3 containers
 
-### Option 2: Direct Node.js Setup
+- postgrex-mono: the db of the monorepo
+- mapapi-mono: the backend
+- website-mono: the website frontend
 
-Prerequisites:
-- Node.js v22 or higher
-
-1. **Install dependencies**:
-```bash
-npm install
-```
-
-2. **Start the development server**:
-```bash
-npm run dev
-```
-
-The application will be available at `http://localhost:3000`
-
-## Mobile Development
-
-For mobile development (iOS), use the following commands:
+To spin them up run from the root of this git repo:
 
 ```bash
-# iOS
-npm run add:ios
-npm run build:dev:ios
-
+docker compose --env-file apps/api/.env.development -f docker-compose-dev.yml up
 ```
 
-Note: Mobile development requires direct Node.js setup (Option 2) and cannot be run through Docker. Currently, mobile development is in the early stages and is not fully ready for production use. Please check back for updates on mobile readiness.
+This automatically builds and starts the necessary containers. When developing and changing source files, the api service automatically reloads the source files. Use the `--build` option when you change npm dependencies and need to rebuild the image. Optionally use the `-d` option for running detached in the background.
 
-## Production Build
+To stop the services, run:
 
-The production deployment is handled via Docker. The necessary configuration files are included in the repository:
-
-- `Dockerfile`: Contains the production build configuration
-  - `NODE_ENV`: Set to 'production'
-  - `HOST`: Set to '0.0.0.0'
-  - `PORT`: Set to '80'
-
- To build and run the production environment:
-```bash
-docker-compose -f docker-compose.prod.yml up --build -d
+```sh
+docker compose --env-file  apps/api/.env.development -f docker-compose-dev.yml down
 ```
 
-To stop the production environment:
-```bash
-docker-compose -f docker-compose.prod.yml down
-```
+4. **Seed Data to the Database**
 
-
-## Development Commands
+- Download database dump from [here](https://drive.google.com/drive/folders/1DU66VaaAoA4704MBNQtk9irZ0QVrO1kO?usp=sharing)
+- Copy db dump to db container
 
 ```bash
-# Start development server with Docker
-docker-compose up
-
-# Rebuild Docker container
-docker-compose up --build
-
-# Clean Docker volumes and rebuild
-docker-compose down -v && docker-compose up --build
-
-# Start development server without Docker
-npm run dev
-
-# Run tests
-npm run test
-
-# Format code
-npm run format
+docker cp agmap.dump postgrex-mono:/tmp/
 ```
 
-## Project Structure
+- Restore database
 
 ```bash
-ag-map-client/
-├── components/     # Vue components
-├── pages/         # Application pages
-├── public/        # Static files
-├── layouts/       # Page layouts
-├── assets/        # Assets (images, styles, etc.)
-├── store/         # State management
-├── utils/         # Utility functions
-├── types/         # TypeScript types
-├── Dockerfile     # Production Docker configuration
-└── docker-compose.yml  # Development Docker configuration
+docker exec -it postgrex-mono pg_restore -U postgres -d agmap -v /tmp/agmap.dump
 ```
 
-## Branching Model
+- Make sure database ready
 
-- `main`: Stable, production-ready code.
-- `development`: Active development branch. Please base your pull requests on `development`.
-
-## Additional Information
-
-- The application uses SSR (Server-Side Rendering) in production
-- For local development, the application runs in development mode with hot-reload enabled
-- Docker development setup includes volume mounts for hot-reloading
-- The production build is optimized for performance and security
-
-## Troubleshooting
-
-Common issues and solutions:
-
-1. **Port already in use**:
 ```bash
-# Check what's using port 3000
-lsof -i :3000
-# Kill the process
-kill -9 <PID>
+docker exec -it postgrex-mono psql -U postgres -d agmap -c "select count(*) from location;"
 ```
 
-2. **Docker cache issues**:
+Expected Result
+
 ```bash
-# Clean Docker cache and rebuild
-docker-compose down -v
-docker-compose up --build
+ count
+-------
+  9215
+(1 row)
 ```
 
-3. **Node modules issues**:
-```bash
-# Remove node_modules and reinstall
-rm -rf node_modules
-npm install
-```
+5. **Check the UI**
 
-## License
+The application is running on `http://localhost:3000/` and calls http://localhost:3001/ for the backend for data
 
-This project is licensed under the GNU General Public License v3.0 (GPL-3.0).
-
+you should see the map with the data showing up.
