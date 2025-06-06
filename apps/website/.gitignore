@@ -1,0 +1,14 @@
+node_modules
+*.log*
+.nuxt
+.nitro
+.cache
+.output
+.output-dev
+.idea/
+.vscode/
+ios
+android
+.env
+dist
+.DS_Store

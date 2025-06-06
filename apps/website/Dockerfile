@@ -4,7 +4,7 @@ WORKDIR /app
 COPY package.json package-lock.json .npmrc ./
 
 RUN npm install --ignore-scripts \
-  && npm install @rollup/rollup-linux-x64-musl \
+  && npm install rollup \
   && npm rebuild \
   && npm run prepare
 
