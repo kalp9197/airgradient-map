@@ -7,8 +7,8 @@ Please see here the new local setup steps. Will add another commit to finalize t
 1. **Clone the repository**:
 
 ```bash
-git clone https://github.com/airgradienthq/airgradient-map-web
-cd airgradient-map-web
+git clone https://github.com/airgradienthq/airgradient-map
+cd airgradient-map
 ```
 
 2. **Configure .env configuration**
