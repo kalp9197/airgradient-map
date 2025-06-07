@@ -8,7 +8,7 @@ Please see here the new local setup steps. Will add another commit to finalize t
 
 ```bash
 git clone https://github.com/airgradienthq/airgradient-map-web
-cd ag-map-web
+cd airgradient-map-web
 ```
 
 2. **Configure .env configuration**
