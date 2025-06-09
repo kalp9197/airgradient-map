@@ -30,8 +30,8 @@ Please see here the new local setup steps. Will add another commit to finalize t
 1. **Clone the repository**:
 
 ```bash
-git clone https://github.com/airgradienthq/airgradient-map-web
-cd ag-map-client
+git clone https://github.com/airgradienthq/airgradient-map
+cd airgradient-map
 ```
 
 2. **Configure .env configuration**
@@ -96,6 +96,7 @@ Expected Result
 
 5. **Check the UI**
 
-The application is running on `http://localhost:3000/` and calls http://localhost:3001/ for the backend for data
+The application is running on `http://localhost:3000/` and calls http://localhost:3001/ for the backend for data you should see the map with the data showing up. 
 
-you should see the map with the data showing up.
+Please note that the compile log shows running on `http://0.0.0.0:3000/` but this will cause CORS issues. So make sure you run on `http://localhost:3000/`.
+
