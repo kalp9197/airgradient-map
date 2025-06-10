@@ -1,0 +1,60 @@
+name: Lint Code
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint-website:
+    name: Lint Website (Frontend)
+    runs-on: ubuntu-latest
+    # Only run if website files changed (optional - remove if you want to always run)
+    # if: github.event_name == 'pull_request' || contains(github.event.head_commit.modified, 'apps/website/') || contains(github.event.head_commit.added, 'apps/website/')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: apps/website/package-lock.json
+
+      - name: Install website dependencies
+        working-directory: apps/website
+        run: |
+          rm -rf node_modules package-lock.json
+          npm install --ignore-scripts
+          npm install @rollup/rollup-linux-x64-gnu
+          npx nuxt prepare
+
+      - name: Run ESLint on website
+        working-directory: apps/website
+        run: npm run lint
+
+  lint-api:
+    name: Lint API (Backend)
+    runs-on: ubuntu-latest
+    # Only run if API files changed (optional - remove if you want to always run)
+    # if: github.event_name == 'pull_request' || contains(github.event.head_commit.modified, 'apps/api/') || contains(github.event.head_commit.added, 'apps/api/')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: apps/api/package-lock.json
+
+      - name: Install API dependencies
+        working-directory: apps/api
+        run: npm install
+
+      - name: Run ESLint on API
+        working-directory: apps/api
+        run: npm run lint

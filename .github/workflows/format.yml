@@ -1,0 +1,56 @@
+name: Prettier Check
+
+on:
+  pull_request:
+    branches: [main, 'development']
+
+jobs:
+  check-prettier-website:
+    name: Check Prettier - Website
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: apps/website/package-lock.json
+
+      - name: Install website dependencies
+        working-directory: apps/website
+        run: |
+          rm -rf node_modules package-lock.json
+          npm install --ignore-scripts
+          npm install @rollup/rollup-linux-x64-gnu
+          npx nuxt prepare
+
+      - name: Run Prettier check on website
+        working-directory: apps/website
+        run: npm run format:check
+
+  check-prettier-api:
+    name: Check Prettier - API
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: apps/api/package-lock.json
+
+      - name: Install API dependencies
+        working-directory: apps/api
+        run: npm install
+
+      - name: Run Prettier check on API
+        working-directory: apps/api
+        run: npm run format:check
