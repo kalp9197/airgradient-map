@@ -1,30 +1,38 @@
-import { Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
-import DatabaseService from "src/database/database.service";
-import Measurement from "./measurement.entity";
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
+import DatabaseService from 'src/database/database.service';
+import Measurement from './measurement.entity';
 
 @Injectable()
 class MeasurementRepository {
   constructor(private readonly databaseService: DatabaseService) {}
   private readonly logger = new Logger(MeasurementRepository.name);
 
+  private buildMeasureQuery(measure?: string): {
+    selectQuery: string;
+    whereQuery?: string;
+  } {
+    if (measure) {
+      return {
+        selectQuery: `m.${measure}`,
+        whereQuery: `WHERE m.${measure} IS NOT NULL`,
+      };
+    } else {
+      return {
+        selectQuery: `m.pm25, m.pm10, m.atmp, m.rhum, m.rco2, m.o3, m.no2`,
+      };
+    }
+  }
+
   async retrieveLatest(
     offset: number = 0,
     limit: number = 100,
     measure?: string,
   ): Promise<Measurement[]> {
-    // Define measure type that are expected
-    var measureSelectQuery: string = "";
-    if (measure) {
-      measureSelectQuery = `m.${measure}`;
-    } else {
-      measureSelectQuery = `m.pm25, m.pm10, m.atmp, m.rhum, m.rco2, m.o3, m.no2`;
-    }
-
-    // Only include rows that include for the requested measure.
-    var measureWhereQuery: string = "";
-    if (measure) {
-      measureWhereQuery = `WHERE m.${measure} IS NOT NULL`;
-    }
+    const { selectQuery, whereQuery } = this.buildMeasureQuery(measure);
 
     const query = ` 
             WITH latest_measurements AS (
@@ -43,7 +51,7 @@ class MeasurementRepository {
                 ST_X(l.coordinate) AS longitude,
                 ST_Y(l.coordinate) AS latitude,
                 l.sensor_type AS "sensorType",
-                ${measureSelectQuery},
+                ${selectQuery},
                 lm.last_measured_at AS "measuredAt"
             FROM 
                 latest_measurements lm
@@ -51,7 +59,7 @@ class MeasurementRepository {
                 measurement m ON lm.location_id = m.location_id AND lm.last_measured_at = m.measured_at
             JOIN 
                 location l ON m.location_id = l.id
-            ${measureWhereQuery}
+            ${whereQuery}
             ORDER BY 
                 lm.location_id 
             OFFSET $1 LIMIT $2; 
@@ -67,7 +75,7 @@ class MeasurementRepository {
       );
     } catch (error) {
       this.logger.error(error);
-      throw new InternalServerErrorException("Error query latest measures");
+      throw new InternalServerErrorException('Error query latest measures');
     }
   }
 
@@ -78,13 +86,7 @@ class MeasurementRepository {
     yMax: number,
     measure?: string,
   ): Promise<Measurement[]> {
-    // Define measure type that are expected
-    var measureSelectQuery: string = "";
-    if (measure) {
-      measureSelectQuery = `m.${measure}`;
-    } else {
-      measureSelectQuery = `m.pm25, m.pm10, m.atmp, m.rhum, m.rco2, m.o3, m.no2`;
-    }
+    const { selectQuery, whereQuery } = this.buildMeasureQuery(measure);
 
     // Format query
     const query = `
@@ -112,14 +114,15 @@ class MeasurementRepository {
                 ST_X(l.coordinate) AS longitude,
                 ST_Y(l.coordinate) AS latitude,
                 l.sensor_type AS "sensorType",
-                ${measureSelectQuery},
+                ${selectQuery},
                 lm.last_measured_at AS "measuredAt"
             FROM 
                 latest_measurements lm
             JOIN 
                 measurement m ON lm.location_id = m.location_id AND lm.last_measured_at = m.measured_at
             JOIN 
-                location l ON m.location_id = l.id;
+                location l ON m.location_id = l.id
+                ${whereQuery};
         `;
 
     try {
@@ -137,7 +140,9 @@ class MeasurementRepository {
       );
     } catch (error) {
       this.logger.error(error);
-      throw new InternalServerErrorException("Error query latest measures by area");
+      throw new InternalServerErrorException(
+        'Error query latest measures by area',
+      );
     }
   }
 }
