@@ -33,10 +33,7 @@ Location
                 <span class="unit-label">{{ currentValueData.unit }}</span>
               </h4>
               <p :class="currentValueData.textColor" class="mb-0 current-label">
-                <span class="measure-label">
-                  <UiHTMLSafelabel :label="currentValueData.labelHTML" />
-                </span>
-                {{ $formatDate(currentValueData.date, 'HH:mm,  MMM d') }}
+                <span> Current <UiHTMLSafelabel :label="currentValueData.labelHTML" /> </span>
               </p>
             </div>
           </div>
@@ -77,7 +74,6 @@ Location
     HistoryPeriod,
     HistoryPeriodConfig,
     LocationDetails,
-    LocationHistoryDataItem,
     MeasureNames,
     SensorType
   } from '~/types';
@@ -87,7 +83,7 @@ Location
 
   import { DialogInstance, AGMapLocationData, LocationHistoryData } from '~/types';
   import { useGeneralConfigStore } from '~/store/general-config-store';
-  import { useRuntimeConfig, useNuxtApp } from 'nuxt/app';
+  import { useRuntimeConfig } from 'nuxt/app';
   import { getDateRangeFromToday } from '~/utils/date';
   import { HISTORY_PERIODS } from '~/constants/shared/chart-periods';
   import { useChartjsOptions } from '~/composables/shared/historical-data/useChartJsOptions';
@@ -102,7 +98,6 @@ Location
     dialog: DialogInstance<{ location: AGMapLocationData }>;
   }>();
 
-  const { $formatDate } = useNuxtApp();
   const apiUrl = useRuntimeConfig().public.apiUrl;
   const generalConfigStore = useGeneralConfigStore();
   const mapLocationData: Ref<AGMapLocationData> = ref(null);
@@ -120,14 +115,8 @@ Location
     textColor: string;
     labelHTML: string;
     unit: string;
-    date: string;
   }> = computed(() => {
     if (!locationHistoryData.value) {
-      return null;
-    }
-
-    const mostRecentData = getMostRecentData(locationHistoryData.value.data);
-    if (!mostRecentData) {
       return null;
     }
 
@@ -136,7 +125,7 @@ Location
       textColorClass: ''
     };
 
-    let value = Number.parseFloat(mostRecentData.value);
+    let value = mapLocationData.value.value;
     switch (generalConfigStore.selectedMeasure) {
       case MeasureNames.PM_AQI:
         value = pm25ToAQI(value);
@@ -155,25 +144,9 @@ Location
       value: value,
       unit: MEASURE_UNITS[generalConfigStore.selectedMeasure],
       labelHTML: MEASURE_LABELS_SUBSCRIPTS[generalConfigStore.selectedMeasure],
-      textColor: colorConfig.textColorClass,
-      date: mostRecentData.timebucket
+      textColor: colorConfig.textColorClass
     };
   });
-
-  function getMostRecentData(data: LocationHistoryDataItem[]): LocationHistoryDataItem | null {
-    if (data?.length) {
-      let currentIndex = data.length;
-      let value = null;
-      while (currentIndex > 0 && value === null) {
-        if (data[currentIndex]?.value) {
-          value = data[currentIndex];
-        }
-        currentIndex--;
-      }
-      return value;
-    }
-    return null;
-  }
 
   async function fetchLocationDetails(locationId: number): Promise<void> {
     detailsLoading.value = true;
@@ -280,16 +253,6 @@ Location
     gap: 15px;
     align-items: center;
     justify-content: center;
-  }
-
-  .measure-label {
-    padding-right: 5px;
-    margin-right: 5px;
-    border-right: 1px solid var(--main-text-color);
-  }
-
-  .text-light .measure-label {
-    border-right: 1px solid var(--main-white-color);
   }
 
   .text-dark .measure-icon {
