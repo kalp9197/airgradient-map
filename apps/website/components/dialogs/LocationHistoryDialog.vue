@@ -10,7 +10,7 @@ Location
       <UiProgressBar :show="loading"></UiProgressBar>
       <v-card-title>
         <div class="d-flex align-center justify-center gap-2 gap-md-3 pl-2 py-2 pr-7 flex-wrap">
-          <h5 class="m-0">{{ mapLocationData?.locationName }}</h5>
+          <h5 class="m-0 location-name">{{ mapLocationData?.locationName }}</h5>
           <v-chip>
             {{
               mapLocationData?.sensorType === SensorType.reference ? 'Reference' : 'Small Sensor'
@@ -125,7 +125,8 @@ Location
       textColorClass: ''
     };
 
-    let value = mapLocationData.value.value;
+    let value = Math.round(mapLocationData.value.value);
+
     switch (generalConfigStore.selectedMeasure) {
       case MeasureNames.PM_AQI:
         value = pm25ToAQI(value);
@@ -235,6 +236,11 @@ Location
 </script>
 
 <style lang="scss" scoped>
+  .location-name {
+    white-space: normal;
+    text-align: center;
+  }
+
   .chart-controls {
     display: flex;
     flex-direction: row;
