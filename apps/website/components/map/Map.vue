@@ -231,6 +231,15 @@
   }
 
   onMounted(() => {
+    if ([<MeasureNames>'pm02', <MeasureNames>'pm02_raw'].includes(urlState.meas)) {
+      setUrlState({
+        meas: MeasureNames.PM25
+      });
+    } else if (urlState.meas === <MeasureNames>'pi02') {
+      setUrlState({
+        meas: MeasureNames.PM_AQI
+      });
+    }
     useGeneralConfigStore().setSelectedMeasure(urlState.meas);
   });
 </script>
