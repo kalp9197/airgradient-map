@@ -10,7 +10,7 @@ Location
       <UiProgressBar :show="loading"></UiProgressBar>
       <v-card-title>
         <div class="d-flex align-center justify-center gap-2 gap-md-3 pl-2 py-2 pr-7 flex-wrap">
-          <h5 class="m-0">{{ mapLocationData?.locationName }}</h5>
+          <h5 class="m-0 location-name">{{ mapLocationData?.locationName }}</h5>
           <v-chip>
             {{
               mapLocationData?.sensorType === SensorType.reference ? 'Reference' : 'Small Sensor'
@@ -33,10 +33,7 @@ Location
                 <span class="unit-label">{{ currentValueData.unit }}</span>
               </h4>
               <p :class="currentValueData.textColor" class="mb-0 current-label">
-                <span class="measure-label">
-                  <UiHTMLSafelabel :label="currentValueData.labelHTML" />
-                </span>
-                {{ $formatDate(currentValueData.date, 'HH:mm,  MMM d') }}
+                <span> Current <UiHTMLSafelabel :label="currentValueData.labelHTML" /> </span>
               </p>
             </div>
           </div>
@@ -57,6 +54,9 @@ Location
           <Bar v-if="chartData && chartOptions" :data="chartData" :options="chartOptions" />
         </div>
       </ClientOnly>
+      <div class="mt-4">
+        <UiColorsLegend :size="ColorsLegendSize.SMALL" />
+      </div>
       <p style="height: 20px" class="mb-0 mt-4">
         <small v-if="chartOptions && locationDetails?.ownerNameDisplay">
           Contributor:
@@ -69,11 +69,11 @@ Location
 
 <script setup lang="ts">
   import {
+    ColorsLegendSize,
     DialogSize,
     HistoryPeriod,
     HistoryPeriodConfig,
     LocationDetails,
-    LocationHistoryDataItem,
     MeasureNames,
     SensorType
   } from '~/types';
@@ -83,12 +83,12 @@ Location
 
   import { DialogInstance, AGMapLocationData, LocationHistoryData } from '~/types';
   import { useGeneralConfigStore } from '~/store/general-config-store';
-  import { useRuntimeConfig, useNuxtApp } from 'nuxt/app';
+  import { useRuntimeConfig } from 'nuxt/app';
   import { getDateRangeFromToday } from '~/utils/date';
   import { HISTORY_PERIODS } from '~/constants/shared/chart-periods';
   import { useChartjsOptions } from '~/composables/shared/historical-data/useChartJsOptions';
   import { useChartjsData } from '~/composables/shared/historical-data/useChartJsData';
-  import { MEASURE_LABELS_SUBSCRIPTS } from '~/constants/shared/measure-lables';
+  import { MEASURE_LABELS_SUBSCRIPTS } from '~/constants/shared/measure-labels';
   import { pm25ToAQI } from '~/utils/aqi';
   import { getAQIColor, getCO2Color, getPM25Color } from '~/utils';
   import { MEASURE_UNITS } from '~/constants/shared/measure-units';
@@ -98,7 +98,6 @@ Location
     dialog: DialogInstance<{ location: AGMapLocationData }>;
   }>();
 
-  const { $formatDate } = useNuxtApp();
   const apiUrl = useRuntimeConfig().public.apiUrl;
   const generalConfigStore = useGeneralConfigStore();
   const mapLocationData: Ref<AGMapLocationData> = ref(null);
@@ -116,14 +115,8 @@ Location
     textColor: string;
     labelHTML: string;
     unit: string;
-    date: string;
   }> = computed(() => {
     if (!locationHistoryData.value) {
-      return null;
-    }
-
-    const mostRecentData = getMostRecentData(locationHistoryData.value.data);
-    if (!mostRecentData) {
       return null;
     }
 
@@ -132,7 +125,8 @@ Location
       textColorClass: ''
     };
 
-    let value = Number.parseFloat(mostRecentData.value);
+    let value = Math.round(mapLocationData.value.value);
+
     switch (generalConfigStore.selectedMeasure) {
       case MeasureNames.PM_AQI:
         value = pm25ToAQI(value);
@@ -151,25 +145,9 @@ Location
       value: value,
       unit: MEASURE_UNITS[generalConfigStore.selectedMeasure],
       labelHTML: MEASURE_LABELS_SUBSCRIPTS[generalConfigStore.selectedMeasure],
-      textColor: colorConfig.textColorClass,
-      date: mostRecentData.timebucket
+      textColor: colorConfig.textColorClass
     };
   });
-
-  function getMostRecentData(data: LocationHistoryDataItem[]): LocationHistoryDataItem | null {
-    if (data?.length) {
-      let currentIndex = data.length;
-      let value = null;
-      while (currentIndex > 0 && value === null) {
-        if (data[currentIndex]?.value) {
-          value = data[currentIndex];
-        }
-        currentIndex--;
-      }
-      return value;
-    }
-    return null;
-  }
 
   async function fetchLocationDetails(locationId: number): Promise<void> {
     detailsLoading.value = true;
@@ -258,6 +236,11 @@ Location
 </script>
 
 <style lang="scss" scoped>
+  .location-name {
+    white-space: normal;
+    text-align: center;
+  }
+
   .chart-controls {
     display: flex;
     flex-direction: row;
@@ -276,16 +259,6 @@ Location
     gap: 15px;
     align-items: center;
     justify-content: center;
-  }
-
-  .measure-label {
-    padding-right: 5px;
-    margin-right: 5px;
-    border-right: 1px solid var(--main-text-color);
-  }
-
-  .text-light .measure-label {
-    border-right: 1px solid var(--main-white-color);
   }
 
   .text-dark .measure-icon {
