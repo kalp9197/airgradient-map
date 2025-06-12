@@ -55,11 +55,20 @@
   import { pm25ToAQI } from '~/utils/aqi';
   import { useGeneralConfigStore } from '~/store/general-config-store';
   import { dialogStore } from '~/composables/shared/ui/useDialog';
+  import { useIntervalRefresh } from '~/composables/shared/useIntervalRefresh';
+  import { CURRENT_DATA_REFRESH_INTERVAL } from '~/constants/map/refresh-interval';
 
   const loading = ref<boolean>(false);
   const map = ref<typeof LMap>();
   const apiUrl = useRuntimeConfig().public.apiUrl;
   const generalConfigStore = useGeneralConfigStore();
+  const { startRefreshInterval, stopRefreshInterval, isRefreshIntervalActive } = useIntervalRefresh(
+    updateMapData,
+    CURRENT_DATA_REFRESH_INTERVAL,
+    {
+      skipFirstRefresh: true
+    }
+  );
 
   const locationHistoryDialogId = DialogId.LOCATION_HISTORY_CHART;
 
@@ -170,7 +179,17 @@
       lat: mapInstance.getCenter().lat.toFixed(2),
       long: mapInstance.getCenter().lng.toFixed(2)
     });
+    
+    if (isRefreshIntervalActive.value) {
+      stopRefreshInterval();
+    } else {
+      startRefreshInterval();
+    }
 
+    await updateMapData();
+  }
+
+  async function updateMapData(): Promise<void> {
     try {
       const bounds: LatLngBounds = mapInstance.getBounds();
       const response = await $fetch<AGMapData>(`${apiUrl}/measurements/current/cluster`, {
