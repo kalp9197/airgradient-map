@@ -50,14 +50,14 @@ Location
         </UiDropdownControl>
       </div>
       <ClientOnly>
-        <div style="height: 350px; width: 100%">
+        <div class="chart-container">
           <Bar v-if="chartData && chartOptions" :data="chartData" :options="chartOptions" />
         </div>
       </ClientOnly>
       <div class="mt-4">
         <UiColorsLegend :size="ColorsLegendSize.SMALL" />
       </div>
-      <p style="height: 20px" class="mb-0 mt-4">
+      <p class="mb-0 mt-4">
         <small v-if="chartOptions && locationDetails?.ownerName">
           Air quality data for this location is provided by
           <span v-if="!locationDetails?.url">
@@ -255,6 +255,17 @@ Location
 </script>
 
 <style lang="scss" scoped>
+  .chart-container {
+    height: 350px;
+    width: 100%;
+  }
+
+  @media (max-width: 768px) {
+    .chart-container {
+      height: 270px;
+    }
+  }
+
   .location-name {
     white-space: normal;
     text-align: center;
