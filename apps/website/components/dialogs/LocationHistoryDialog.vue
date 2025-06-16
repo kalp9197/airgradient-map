@@ -58,14 +58,14 @@ Location
         <UiColorsLegend :size="ColorsLegendSize.SMALL" />
       </div>
       <p style="height: 20px" class="mb-0 mt-4">
-        <small v-if="chartOptions && locationDetails?.ownerNameDisplay">
+        <small v-if="chartOptions && locationDetails?.ownerName">
           Air quality data for this location is provided by
           <span v-if="!locationDetails?.url">
-            {{ locationDetails?.ownerNameDisplay }}
+            {{ locationDetails?.ownerName }}
           </span>
           <span v-else>
             <a :href="locationDetails?.url" target="_blank">
-              {{ locationDetails?.ownerNameDisplay }}
+              {{ locationDetails?.ownerName }}
             </a>
           </span>
           via
