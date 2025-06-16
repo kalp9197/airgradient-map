@@ -71,19 +71,15 @@ Location
           via
           <span v-if="locationDetails?.dataSource === 'OpenAQ'">
             {{ locationDetails?.provider }} and
-            <a href="https://openaq.org/" target="_blank">
-              OpenAQ
-            </a>
+            <a href="https://openaq.org/" target="_blank"> OpenAQ </a>
           </span>
 
           <span v-if="locationDetails?.dataSource === 'AirGradient'">
-            <a href="https://www.airgradient.com/" target="_blank">
-              AirGradient
-            </a>
+            <a href="https://www.airgradient.com/" target="_blank"> AirGradient </a>
           </span>
 
           under
-           {{ locationDetails?.licenses[0] }}
+          {{ locationDetails?.licenses[0] }}
         </small>
       </p>
     </template>
