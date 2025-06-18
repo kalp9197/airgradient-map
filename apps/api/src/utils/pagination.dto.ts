@@ -1,6 +1,11 @@
-
-import { Type, applyDecorators } from "@nestjs/common";
-import { ApiProperty, ApiExtraModels, ApiOkResponse, getSchemaPath, ApiOperation } from "@nestjs/swagger";
+import { Type, applyDecorators } from '@nestjs/common';
+import {
+  ApiProperty,
+  ApiExtraModels,
+  ApiOkResponse,
+  getSchemaPath,
+  ApiOperation,
+} from '@nestjs/swagger';
 
 export class Pagination<TData> {
   @ApiProperty()
@@ -30,7 +35,7 @@ export const ApiPaginatedResponse = <TModel extends Type<any>>(
 ) => {
   return applyDecorators(
     ApiExtraModels(Pagination, model),
-    ApiOperation({summary: summary, description: description}),
+    ApiOperation({ summary: summary, description: description }),
     ApiOkResponse({
       schema: {
         allOf: [

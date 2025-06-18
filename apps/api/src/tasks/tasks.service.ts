@@ -1,24 +1,24 @@
-import { HttpException, Injectable, Logger } from "@nestjs/common";
-import { Cron, CronExpression } from "@nestjs/schedule";
-import TasksRepository from "./tasks.repository";
-import { TasksHttp } from "./tasks.http";
-import { AirgradientModel } from "./tasks.model";
-import { ConfigService } from "@nestjs/config";
+import { HttpException, Injectable, Logger } from '@nestjs/common';
+import { Cron, CronExpression } from '@nestjs/schedule';
+import TasksRepository from './tasks.repository';
+import { TasksHttp } from './tasks.http';
+import { AirgradientModel } from './tasks.model';
+import { ConfigService } from '@nestjs/config';
 import {
   OpenAQApiLocationsResponse,
   OpenAQApiParametersResponse,
-} from "./model/openaq.model";
+} from './model/openaq.model';
 
 @Injectable()
 export class TasksService {
-  private openAQApiKey = "";
+  private openAQApiKey = '';
 
   constructor(
     private readonly tasksRepository: TasksRepository,
     private readonly http: TasksHttp,
     private readonly configService: ConfigService,
   ) {
-    const apiKey = this.configService.get<string>("API_KEY_OPENAQ");
+    const apiKey = this.configService.get<string>('API_KEY_OPENAQ');
     if (apiKey) {
       this.openAQApiKey = apiKey;
     }
@@ -26,15 +26,15 @@ export class TasksService {
 
   private readonly logger = new Logger(TasksService.name);
 
-  @Cron("*/15 * * * *")
+  @Cron('*/15 * * * *')
   async newData() {
     const start = Date.now();
 
     // Fetch data from the airgradient external API
     const url =
-      "https://api.airgradient.com/public/api/v1/world/locations/measures/current";
+      'https://api.airgradient.com/public/api/v1/world/locations/measures/current';
     const data = await this.http.fetch<AirgradientModel[]>(url);
-    this.logger.debug("Total data: " + data.length);
+    this.logger.debug('Total data: ' + data.length);
 
     const success = await this.tasksRepository.insertAg(data);
     if (success) {
@@ -42,12 +42,12 @@ export class TasksService {
       this.logger.debug(
         `Successfully insert new airgradient latest measures. Time spend ${duration}ms`,
       );
-    } 
+    }
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async runSyncOpenAQLocations() {
-    this.logger.debug("Run job sync OpenAQ locations");
+    this.logger.debug('Run job sync OpenAQ locations');
     const providersId = [118, 119, 70]; // air4thai, airnow, eea
 
     const before = Date.now();
@@ -64,13 +64,13 @@ export class TasksService {
 
   @Cron(CronExpression.EVERY_HOUR)
   async runGetOpenAQLatest() {
-    this.logger.log("Run job retrieve OpenAQ latest value");
+    this.logger.log('Run job retrieve OpenAQ latest value');
     const before = Date.now();
 
     let locationIds = await this.tasksRepository.retrieveOpenAQLocationId();
     if (locationIds === null) {
       // NOTE: Right now ingore until runSyncOpenAQLocations() already triggered
-      this.logger.warn("No openaq locationId found");
+      this.logger.warn('No openaq locationId found');
       return;
     }
 
@@ -87,12 +87,12 @@ export class TasksService {
       var data: OpenAQApiParametersResponse | null;
       try {
         data = await this.http.fetch<OpenAQApiParametersResponse>(url, {
-          "x-api-key": this.openAQApiKey,
+          'x-api-key': this.openAQApiKey,
         });
       } catch (error) {
         if (error instanceof HttpException && error.getStatus() === 404) {
           this.logger.debug(
-            "Requested page already empty for parameters endpoint",
+            'Requested page already empty for parameters endpoint',
           );
           break;
         } else {
@@ -108,10 +108,10 @@ export class TasksService {
           // LocationId is in intereset, push so later will be inserted
           var batch = {};
           // locationId here is the actual locationId from table, not from openaq
-          batch["locationId"] =
+          batch['locationId'] =
             locationIds[data.results[i].locationsId.toString()];
-          batch["pm25"] = data.results[i].value;
-          batch["measuredAt"] = data.results[i].datetime.utc;
+          batch['pm25'] = data.results[i].value;
+          batch['measuredAt'] = data.results[i].datetime.utc;
           batches.push(batch);
 
           matchCounter = matchCounter + 1;
@@ -150,31 +150,31 @@ export class TasksService {
       // Retrieve every 1000 data maximum, so it will sync to database every 500 row
       const url = `https://api.openaq.org/v3/locations?monitor=true&page=${pageCounter}&limit=500&providers_id=${providerId}`;
       const data = await this.http.fetch<OpenAQApiLocationsResponse>(url, {
-        "x-api-key": this.openAQApiKey,
+        'x-api-key': this.openAQApiKey,
       });
       // TODO: response error check
 
       var locations = [];
       for (var i = 0; i < data.results.length; i++) {
         var location = {};
-        location["referenceId"] = data.results[i].id;
-        location["locationName"] = data.results[i].name;
-        location["providerName"] = data.results[i].provider.name;
-        location["ownerName"] = data.results[i].owner.name;
-        location["sensorType"] = "Reference"; // NOTE: Hardcoded for now
-        location["timezone"] = data.results[i].timezone;
-        location["coordinate"] = [
+        location['referenceId'] = data.results[i].id;
+        location['locationName'] = data.results[i].name;
+        location['providerName'] = data.results[i].provider.name;
+        location['ownerName'] = data.results[i].owner.name;
+        location['sensorType'] = 'Reference'; // NOTE: Hardcoded for now
+        location['timezone'] = data.results[i].timezone;
+        location['coordinate'] = [
           data.results[i].coordinates.latitude,
           data.results[i].coordinates.longitude,
         ];
 
         // NOTE: Already formatted to 'license1','license2','license3'
         if (data.results[i].licenses !== null) {
-          location["licenses"] = data.results[i].licenses
+          location['licenses'] = data.results[i].licenses
             .map((license) => `'${license.name}'`)
-            .join(",");
+            .join(',');
         } else {
-          location["licenses"] = null;
+          location['licenses'] = null;
         }
 
         // Append with the other location
@@ -185,14 +185,14 @@ export class TasksService {
 
       // Sometimes `found` field is a string
       const t = typeof data.meta.found;
-      if (t === "number") {
+      if (t === 'number') {
         let foundInt = Number(data.meta.found);
         total = total + Number(data.meta.found);
 
         // Check if this batch is the last batch
         if (foundInt <= data.meta.limit) {
           finish = true;
-          this.logger.debug("Loop finish");
+          this.logger.debug('Loop finish');
         }
       } else {
         total = total + data.meta.limit;

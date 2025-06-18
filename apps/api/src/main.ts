@@ -5,7 +5,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
   // Setup logger
-  const logger = new Logger('Bootstrap')
+  const logger = new Logger('Bootstrap');
   const isProduction = process.env.NODE_ENV === 'production';
   const logLevels: LogLevel[] = isProduction
     ? ['error', 'warn', 'log']
@@ -18,12 +18,17 @@ async function bootstrap() {
 
   // Define CORS
   const originList = isProduction
-    ? ["https://www.airgradient.com", "https://map.airgradient.com"]
-    : ["https://www.airgradient.com", "https://map-int.airgradient.com", "http://localhost:7777", "http://localhost:3000"];
+    ? ['https://www.airgradient.com', 'https://map.airgradient.com']
+    : [
+        'https://www.airgradient.com',
+        'https://map-int.airgradient.com',
+        'http://localhost:7777',
+        'http://localhost:3000',
+      ];
   app.enableCors({
-    origin: originList 
+    origin: originList,
   });
-  
+
   // Setup swagger
   const config = new DocumentBuilder()
     .setTitle('AirGradient Map API')

@@ -1,4 +1,4 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty } from '@nestjs/swagger';
 
 class LocationMeasures {
   @ApiProperty()
@@ -17,7 +17,7 @@ class LocationMeasures {
   rhum: number;
 
   @ApiProperty()
-  rco2: number; 
+  rco2: number;
 
   @ApiProperty()
   o3: number;
@@ -26,7 +26,7 @@ class LocationMeasures {
   no2: number;
 
   @ApiProperty()
-  measuredAt: Date
+  measuredAt: Date;
 
   constructor(partial: Partial<LocationMeasures>) {
     Object.assign(this, partial);
