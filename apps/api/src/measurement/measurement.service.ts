@@ -1,8 +1,8 @@
-import { Injectable, Logger } from "@nestjs/common";
-import MeasurementRepository from "./measurement.repository";
-import Supercluster from "supercluster";
-import MeasurementCluster from "./measurementCluster.model";
-import { ConfigService } from "@nestjs/config";
+import { Injectable } from '@nestjs/common';
+import MeasurementRepository from './measurement.repository';
+import Supercluster from 'supercluster';
+import MeasurementCluster from './measurementCluster.model';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class MeasurementService {
@@ -14,13 +14,13 @@ export class MeasurementService {
     private readonly measurementRepository: MeasurementRepository,
     private readonly configService: ConfigService,
   ) {
-    const clusterRadius = this.configService.get<number>("MAP_CLUSTER_RADIUS");
+    const clusterRadius = this.configService.get<number>('MAP_CLUSTER_RADIUS');
     if (clusterRadius) {
       this.clusterRadius = clusterRadius;
     }
 
     const clusterMaxZoom = this.configService.get<number>(
-      "MAP_CLUSTER_MAX_ZOOM",
+      'MAP_CLUSTER_MAX_ZOOM',
     );
     if (clusterMaxZoom) {
       this.clusterMaxZoom = clusterMaxZoom;
@@ -61,7 +61,7 @@ export class MeasurementService {
     measure?: string,
   ): Promise<MeasurementCluster[]> {
     // Default set to pm25 if not provided
-    let measurementType = measure === null ? "pm25" : measure;
+    let measurementType = measure === null ? 'pm25' : measure;
 
     // Query locations by certain area with measurementType as the value
     const locations = await this.measurementRepository.retrieveLatestByArea(
@@ -80,9 +80,9 @@ export class MeasurementService {
     let geojson = new Array<any>();
     locations.map((point) => {
       geojson.push({
-        type: "Feature",
+        type: 'Feature',
         geometry: {
-          type: "Point",
+          type: 'Point',
           coordinates: [point.latitude, point.longitude],
         },
         properties: {

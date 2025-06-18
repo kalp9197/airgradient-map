@@ -3,9 +3,8 @@ import { MeasurementController } from './measurement.controller';
 import { MeasurementService } from './measurement.service';
 import MeasurementRepository from './measurement.repository';
 
-
 @Module({
   controllers: [MeasurementController],
-  providers: [MeasurementService, MeasurementRepository]
+  providers: [MeasurementService, MeasurementRepository],
 })
 export class MeasurementModule {}

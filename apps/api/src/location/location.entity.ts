@@ -1,4 +1,4 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty } from '@nestjs/swagger';
 
 class Location {
   @ApiProperty()
@@ -16,11 +16,11 @@ class Location {
   @ApiProperty()
   ownerId: number;
 
-  @ApiProperty({ description: "a simple string for comparison" })
+  @ApiProperty({ description: 'a simple string for comparison' })
   ownerName: string;
 
   @ApiProperty({
-    description: "a full owner name that have better presentation",
+    description: 'a full owner name that have better presentation',
   })
   ownerNameDisplay: string;
 
@@ -39,10 +39,10 @@ class Location {
   @ApiProperty()
   licenses: string[];
 
-  @ApiProperty({ description: "Entity that provide the sensor data" })
+  @ApiProperty({ description: 'Entity that provide the sensor data' })
   provider: string;
 
-  @ApiProperty({ description: "From what platform is the data obtained" })
+  @ApiProperty({ description: 'From what platform is the data obtained' })
   dataSource: string;
 
   @ApiProperty()
