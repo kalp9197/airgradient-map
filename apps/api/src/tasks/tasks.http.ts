@@ -1,18 +1,18 @@
-import { HttpException, Injectable } from "@nestjs/common";
-import { HttpService } from "@nestjs/axios";
-import { AxiosError, AxiosRequestConfig } from "axios";
-import { firstValueFrom } from "rxjs";
-import { catchError } from "rxjs/operators";
-import { Logger } from "@nestjs/common";
+import { HttpException, Injectable } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
+import { AxiosError, AxiosRequestConfig } from 'axios';
+import { firstValueFrom } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { Logger } from '@nestjs/common';
 
 @Injectable()
 export class TasksHttp {
-  private readonly logger = new Logger("TasksHttp");
+  private readonly logger = new Logger('TasksHttp');
   constructor(private readonly httpService: HttpService) {}
 
   private defaultHeaders: Record<string, string> = {
-    "Content-Type": "application/json",
-    Accept: "application/json",
+    'Content-Type': 'application/json',
+    Accept: 'application/json',
   };
 
   async fetch<T>(url: string, headers?: Record<string, string>): Promise<T> {
@@ -36,7 +36,7 @@ export class TasksHttp {
             } else {
               // No response or network error
               this.logger.error(`Request error: ${error.message}`);
-              throw new Error("Network error or no response received");
+              throw new Error('Network error or no response received');
             }
           }),
         ),
