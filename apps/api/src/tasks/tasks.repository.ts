@@ -1,11 +1,7 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
-} from "@nestjs/common";
-import DatabaseService from "src/database/database.service";
-import { AirgradientModel } from "./tasks.model";
-import { Logger } from "@nestjs/common";
+import { Injectable, NotFoundException } from '@nestjs/common';
+import DatabaseService from 'src/database/database.service';
+import { AirgradientModel } from './tasks.model';
+import { Logger } from '@nestjs/common';
 
 @Injectable()
 class TasksRepository {
@@ -15,7 +11,7 @@ class TasksRepository {
 
   async getAll() {
     const result = await this.databaseService.runQuery(
-      "SELECT * FROM measurement;",
+      'SELECT * FROM measurement;',
     );
     return result.rows;
   }
@@ -28,7 +24,7 @@ class TasksRepository {
       const result = await this.databaseService.runQuery(query);
       if (result.rowCount === 0) {
         throw new NotFoundException(
-          "Airgradient record not found in owner table",
+          'Airgradient record not found in owner table',
         );
       }
 
@@ -68,7 +64,7 @@ class TasksRepository {
               return `(${locationId},'Small Sensor',${licensesFmt},'${escapeSingleQuote(locationName)}','${timezone}',${geometry},'AirGradient')`;
             },
           )
-          .join(",");
+          .join(',');
 
         const locationQuery = `
             INSERT INTO public."location" (owner_id, reference_id, sensor_type, licenses, location_name, timezone, coordinate, provider)
@@ -85,7 +81,7 @@ class TasksRepository {
             ({ locationId, pm02, pm10, atmp, rhum, rco2, timestamp }) =>
               `(${locationId}, ${pm02}, ${pm10}, ${atmp}, ${rhum}, ${rco2}, '${timestamp}')`,
           )
-          .join(", ");
+          .join(', ');
 
         const measurementQuery = `
             INSERT INTO public."measurement" (location_id, pm25, pm10, atmp, rhum, rco2, measured_at)
@@ -101,15 +97,15 @@ class TasksRepository {
         // TODO: Is unique key needed for measurements??? Is it affecting performance?
         // TODO: Maybe can use postgres prepare statement later on?
 
-        await this.databaseService.runQuery("BEGIN");
+        await this.databaseService.runQuery('BEGIN');
         await this.databaseService.runQuery(locationQuery);
         await this.databaseService.runQuery(measurementQuery);
-        await this.databaseService.runQuery("COMMIT");
+        await this.databaseService.runQuery('COMMIT');
       }
 
       return true;
     } catch (error) {
-      await this.databaseService.runQuery("ROLLBACK");
+      await this.databaseService.runQuery('ROLLBACK');
       this.logger.error(error);
       return false;
     }
@@ -140,11 +136,11 @@ class TasksRepository {
             const geometry = `'POINT(${coordinate[0]} ${coordinate[1]})'`;
             // Build licenses data type
             const licensesFmt =
-              licenses !== null ? `ARRAY[${licenses}]` : "ARRAY[]::VARCHAR[]";
+              licenses !== null ? `ARRAY[${licenses}]` : 'ARRAY[]::VARCHAR[]';
             return `('${ownerName}','${escapeSingleQuote(locationName)}',${referenceId},'${sensorType}','${timezone}',${licensesFmt},'OpenAQ','${providerName}',${geometry})`;
           },
         )
-        .join(",");
+        .join(',');
 
       const query = `
         WITH batch_data AS (
@@ -209,7 +205,7 @@ class TasksRepository {
     }
   }
 
-  async retrieveOpenAQLocationId(): Promise<{} | null> {
+  async retrieveOpenAQLocationId(): Promise<object | null> {
     try {
       const result = await this.databaseService.runQuery(
         `SELECT json_object_agg(reference_id::TEXT, id) FROM "location" WHERE data_source = 'OpenAQ';`,
@@ -230,7 +226,7 @@ class TasksRepository {
         .flatMap(({ locationId, pm25, measuredAt }) => {
           return `(${locationId},${pm25},'${measuredAt}')`;
         })
-        .join(",");
+        .join(',');
 
       var query = `
         INSERT INTO measurement (location_id, pm25, measured_at) 

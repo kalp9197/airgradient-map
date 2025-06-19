@@ -120,7 +120,7 @@ class MeasurementRepository {
     if (hasValidation) {
       params.push(minVal, maxVal);
     }
-    
+
     // Format query
     const query = `
             WITH latest_measurements AS (

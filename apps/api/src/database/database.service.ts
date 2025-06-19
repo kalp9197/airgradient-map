@@ -1,10 +1,10 @@
-import { Inject, Injectable, Logger } from "@nestjs/common";
-import { Pool, PoolClient } from "pg";
-import { CONNECTION_POOL } from "./database.module-definition";
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Pool, PoolClient } from 'pg';
+import { CONNECTION_POOL } from './database.module-definition';
 
 @Injectable()
 class DatabaseService {
-  private readonly logger = new Logger("Database");
+  private readonly logger = new Logger('Database');
   constructor(@Inject(CONNECTION_POOL) private readonly pool: Pool) {}
 
   async runQuery(query: string, params?: unknown[]) {
@@ -25,15 +25,15 @@ class DatabaseService {
   ) {
     // message without unnecessary spaces and newlines
     const message = this.getLogMessage(query, params)
-      .replace(/\n|/g, "")
-      .replace(/  +/g, " ");
+      .replace(/\n|/g, '')
+      .replace(/  +/g, ' ');
 
     try {
       const result = await source.query(query, params);
       // this.logger.log(message);
       return result;
     } catch (error) {
-       this.logger.error(message);
+      this.logger.error(message);
       throw error;
     }
   }
@@ -43,7 +43,7 @@ class DatabaseService {
 
     return new Proxy(poolClient, {
       get: (target: PoolClient, propertyName: keyof PoolClient) => {
-        if (propertyName === "query") {
+        if (propertyName === 'query') {
           return (query: string, params?: unknown[]) => {
             return this.queryWithLogging(target, query, params);
           };
