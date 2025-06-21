@@ -1,10 +1,10 @@
-import { Module } from "@nestjs/common";
-import { ScheduleModule } from "@nestjs/schedule";
-import DatabaseModule from "./database/database.module";
-import { TasksModule } from "./tasks/tasks.module";
-import { ConfigModule, ConfigService } from "@nestjs/config";
-import { MeasurementModule } from "./measurement/measurement.module";
-import { LocationModule } from "./location/location.module";
+import { Module } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
+import DatabaseModule from './database/database.module';
+import { TasksModule } from './tasks/tasks.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MeasurementModule } from './measurement/measurement.module';
+import { LocationModule } from './location/location.module';
 
 @Module({
   imports: [
@@ -18,11 +18,11 @@ import { LocationModule } from "./location/location.module";
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        host: configService.get("DATABASE_HOST"),
-        port: configService.get("DATABASE_PORT"),
-        user: configService.get("DATABASE_USER"),
-        password: configService.get("DATABASE_PASSWORD"),
-        database: configService.get("DATABASE_NAME"),
+        host: configService.get('DATABASE_HOST'),
+        port: configService.get('DATABASE_PORT'),
+        user: configService.get('DATABASE_USER'),
+        password: configService.get('DATABASE_PASSWORD'),
+        database: configService.get('DATABASE_NAME'),
       }),
     }),
     MeasurementModule,

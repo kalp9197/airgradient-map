@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Install deps and copy project to container
 COPY package*.json ./
-RUN npm install --legacy-peer-deps
+RUN npm install
 COPY . .
 
 # First build and run with dev tag
