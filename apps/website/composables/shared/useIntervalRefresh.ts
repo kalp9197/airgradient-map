@@ -8,13 +8,19 @@ export function useIntervalRefresh<T>(
     onError?: (error: Error) => void;
     onSuccess?: () => void;
     skipFirstRefresh?: boolean;
+    skipOnVisibilityHidden?: boolean;
   }
 ) {
   const isRefreshIntervalActive = ref(false);
   const intervalRef = ref<NodeJS.Timeout | null>(null);
 
   const refresh = async () => {
-    if (!isRefreshIntervalActive.value) return;
+    if (
+      !isRefreshIntervalActive.value ||
+      (options?.skipOnVisibilityHidden && document.visibilityState !== 'visible')
+    ) {
+      return;
+    }
 
     try {
       refreshFunction();
@@ -22,6 +28,12 @@ export function useIntervalRefresh<T>(
     } catch (error) {
       options?.onError?.(error as Error);
     }
+  };
+
+  const resetIntervalDuration = (duration: number) => {
+    stopRefreshInterval();
+    interval = duration;
+    startRefreshInterval();
   };
 
   const startRefreshInterval = () => {
@@ -49,6 +61,7 @@ export function useIntervalRefresh<T>(
     isRefreshIntervalActive: readonly(isRefreshIntervalActive),
     startRefreshInterval,
     stopRefreshInterval,
-    refresh
+    refresh,
+    resetIntervalDuration
   };
 }

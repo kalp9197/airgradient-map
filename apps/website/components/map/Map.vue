@@ -66,7 +66,8 @@
     updateMapData,
     CURRENT_DATA_REFRESH_INTERVAL,
     {
-      skipFirstRefresh: true
+      skipFirstRefresh: true,
+      skipOnVisibilityHidden: true
     }
   );
 
