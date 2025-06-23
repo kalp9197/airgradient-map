@@ -180,7 +180,7 @@
       lat: mapInstance.getCenter().lat.toFixed(2),
       long: mapInstance.getCenter().lng.toFixed(2)
     });
-    
+
     if (isRefreshIntervalActive.value) {
       stopRefreshInterval();
     } else {
