@@ -90,13 +90,14 @@ Location
   import {
     ColorsLegendSize,
     DialogSize,
+    HistoryBucket,
     HistoryPeriod,
     HistoryPeriodConfig,
     LocationDetails,
     MeasureNames,
     SensorType
   } from '~/types';
-  import { onMounted, ref, Ref, watch, computed } from 'vue';
+  import { onMounted, ref, Ref, watch, computed, onUnmounted } from 'vue';
   import { Bar } from 'vue-chartjs';
   import { ChartData, ChartOptions } from 'chart.js';
 
@@ -112,6 +113,11 @@ Location
   import { getAQIColor, getCO2Color, getPM25Color } from '~/utils';
   import { MEASURE_UNITS } from '~/constants/shared/measure-units';
   import { useChartJsAnnotations } from '~/composables/shared/historical-data/useChartJsAnnotations';
+  import { useIntervalRefresh } from '~/composables/shared/useIntervalRefresh';
+  import {
+    MINUTELY_HISTORICAL_DATA_REFRESH_INTERVAL,
+    HOURLY_HISTORICAL_DATA_REFRESH_INTERVAL
+  } from '~/constants/map/refresh-interval';
 
   const props = defineProps<{
     dialog: DialogInstance<{ location: AGMapLocationData }>;
@@ -127,6 +133,28 @@ Location
   const historyLoading: Ref<boolean> = ref(false);
   const detailsLoading: Ref<boolean> = ref(false);
   const loading: Ref<boolean> = computed(() => historyLoading.value || detailsLoading.value);
+
+  const refreshIntervalDuration = computed(() => {
+    const period = generalConfigStore.selectedHistoryPeriod;
+    return period.defaultBucketSize === HistoryBucket.MINUTES_15
+      ? MINUTELY_HISTORICAL_DATA_REFRESH_INTERVAL
+      : HOURLY_HISTORICAL_DATA_REFRESH_INTERVAL;
+  });
+
+  const { startRefreshInterval, stopRefreshInterval, resetIntervalDuration } = useIntervalRefresh(
+    () => {
+      chartOptions.value.animation = false;
+      return fetchLocationHistory(mapLocationData.value?.locationId);
+    },
+    refreshIntervalDuration.value,
+    {
+      skipFirstRefresh: true,
+      onError: error => {
+        console.error('Failed to refresh historical data:', error);
+      },
+      skipOnVisibilityHidden: true
+    }
+  );
 
   const currentValueData: Ref<{
     bgColor: string;
@@ -218,11 +246,15 @@ Location
   }
 
   function handleChartPeriodChange(period: HistoryPeriod) {
+    chartOptions.value.animation = {
+      duration: 100
+    };
     const periodConfig = HISTORY_PERIODS.find(
       (periodConfig: HistoryPeriodConfig) => periodConfig.value === period
     );
     useGeneralConfigStore().setSelectedHistoryPeriod(periodConfig);
     fetchLocationHistory(mapLocationData.value.locationId);
+    resetIntervalDuration(refreshIntervalDuration.value);
   }
 
   onMounted(() => {
@@ -230,7 +262,12 @@ Location
     if (mapLocationData.value) {
       fetchLocationHistory(mapLocationData.value.locationId);
       fetchLocationDetails(mapLocationData.value.locationId);
+      startRefreshInterval();
     }
+  });
+
+  onUnmounted(() => {
+    stopRefreshInterval();
   });
 
   watch(locationHistoryData, (newData: LocationHistoryData) => {

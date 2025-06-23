@@ -1,1 +1,1 @@
-export * from './mapData';
+export * from './map-data';
