@@ -1,5 +1,6 @@
 import { ChartOptions } from 'chart.js';
 import { AnnotationOptions } from 'chartjs-plugin-annotation';
+import { DateTime } from 'luxon';
 import { CHART_MIN_VISIBLE_VALUE } from '~/constants/shared/chart-min-visible-value';
 import { MEASURE_LABELS_WITH_UNITS } from '~/constants/shared/measure-labels';
 import { useGeneralConfigStore } from '~/store/general-config-store';
@@ -11,12 +12,14 @@ interface UseChartjsOptionsParams {
   measure: MeasureNames;
   animated: boolean;
   annotations: Record<string, AnnotationOptions>;
+  timezone?: string;
 }
 
 export function useChartjsOptions({
   measure,
   animated,
-  annotations
+  annotations,
+  timezone
 }: UseChartjsOptionsParams): ChartOptions<'bar'> {
   const annotationsFontSize = getChartFontSize(measure);
   const currentPeriod = useGeneralConfigStore().selectedHistoryPeriod;
@@ -70,6 +73,15 @@ export function useChartjsOptions({
           unit: currentPeriod.chartUnit,
           displayFormats: {
             quarter: 'MMM YYYY'
+          },
+          parser: (date: string): any => {
+            if (timezone) {              
+              return DateTime.fromISO(date)
+                .setZone(timezone)             
+                .toFormat('yyyy-MM-dd\'T\'HH:mm:ss');
+            } else {
+              return date;
+            }
           }
         }
       },

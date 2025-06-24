@@ -45,3 +45,13 @@ export enum HistoryPeriod {
   MONTHS_6 = '6_months',
   YEAR = 'year'
 }
+
+export enum HistoricalDataTimeZone {
+  LOCAL = 'local',
+  USER = 'user'
+}
+
+export interface HistoricalDataTimeZoneConfig {
+  value: HistoricalDataTimeZone;
+  label: string;
+}

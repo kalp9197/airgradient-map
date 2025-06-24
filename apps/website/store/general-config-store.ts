@@ -1,14 +1,15 @@
 import { defineStore } from 'pinia';
-import { HISTORY_PERIODS } from '~/constants/shared/chart-periods';
-import { HistoryPeriodConfig } from '~/types';
+import { HISTORY_PERIODS } from '~/constants';
+import { HistoricalDataTimeZone, HistoricalDataTimeZoneConfig, HistoryPeriodConfig } from '~/types';
 
 import { MeasureNames } from '~/types';
-import { GeneralConfigStoreState } from '~/types/store/general-config-store';
+import { GeneralConfigStoreState } from '~/types';
 
 export const useGeneralConfigStore = defineStore('generalConfig', {
   state: (): GeneralConfigStoreState => ({
     selectedMeasure: MeasureNames.PM25,
-    selectedHistoryPeriod: HISTORY_PERIODS[0]
+    selectedHistoryPeriod: HISTORY_PERIODS[0],
+    selectedHistoricalDataTimeZoneConfig: HistoricalDataTimeZone.LOCAL
   }),
   actions: {
     setSelectedMeasure(measure: MeasureNames) {
@@ -16,6 +17,9 @@ export const useGeneralConfigStore = defineStore('generalConfig', {
     },
     setSelectedHistoryPeriod(period: HistoryPeriodConfig) {
       this.selectedHistoryPeriod = period;
+    },
+    setSelectedHistoricalDataTimeZoneConfig(timezone: HistoricalDataTimeZone) {
+      this.selectedHistoricalDataTimeZoneConfig = timezone;
     }
   }
 });

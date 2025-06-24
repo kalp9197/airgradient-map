@@ -39,15 +39,27 @@ Location
           </div>
         </div>
 
-        <UiDropdownControl
-          v-if="chartOptions"
-          class="period-control"
-          :selected-value="generalConfigStore.selectedHistoryPeriod.value"
-          :options="HISTORY_PERIODS"
-          :disabled="loading"
-          @change="handleChartPeriodChange"
-        >
-        </UiDropdownControl>
+        <div class="d-flex align-center justify-center gap-2">
+          <UiDropdownControl
+            v-if="chartOptions"
+            class="tz-control"
+            :selected-value="selectedHistoricalDataTimeZoneConfig.value"
+            :options="historicalDataTimeZoneOptions"
+            :disabled="loading"
+            @change="handleHistoricalDataTimeZoneChange"
+          >
+          </UiDropdownControl>
+
+          <UiDropdownControl
+            v-if="chartOptions"
+            class="period-control"
+            :selected-value="generalConfigStore.selectedHistoryPeriod.value"
+            :options="HISTORY_PERIODS"
+            :disabled="loading"
+            @change="handleChartPeriodChange"
+          >
+          </UiDropdownControl>
+        </div>
       </div>
       <ClientOnly>
         <div style="height: 350px; width: 100%">
@@ -90,6 +102,8 @@ Location
   import {
     ColorsLegendSize,
     DialogSize,
+    HistoricalDataTimeZone,
+    HistoricalDataTimeZoneConfig,
     HistoryBucket,
     HistoryPeriod,
     HistoryPeriodConfig,
@@ -118,6 +132,9 @@ Location
     MINUTELY_HISTORICAL_DATA_REFRESH_INTERVAL,
     HOURLY_HISTORICAL_DATA_REFRESH_INTERVAL
   } from '~/constants/map/refresh-interval';
+  import { HISTORICAL_DATA_TIMEZONE_OPTIONS } from '~/constants';
+  import { useHistoricalDataTimezone } from '~/composables/shared/useHistoricalDataTimezone';
+import { AnnotationOptions } from 'chartjs-plugin-annotation';
 
   const props = defineProps<{
     dialog: DialogInstance<{ location: AGMapLocationData }>;
@@ -125,6 +142,7 @@ Location
 
   const apiUrl = useRuntimeConfig().public.apiUrl;
   const generalConfigStore = useGeneralConfigStore();
+  const { getTimezoneLabel, userTimezone } = useHistoricalDataTimezone();
   const mapLocationData: Ref<AGMapLocationData> = ref(null);
   const locationHistoryData: Ref<LocationHistoryData> = ref(null);
   const locationDetails: Ref<LocationDetails> = ref(null);
@@ -133,6 +151,28 @@ Location
   const historyLoading: Ref<boolean> = ref(false);
   const detailsLoading: Ref<boolean> = ref(false);
   const loading: Ref<boolean> = computed(() => historyLoading.value || detailsLoading.value);
+  const historicalDataTimeZoneOptions: Ref<HistoricalDataTimeZoneConfig[]> = computed(() => {
+    return HISTORICAL_DATA_TIMEZONE_OPTIONS.map(option => {
+      let label = option.label;
+      const timezone =
+        option.value === HistoricalDataTimeZone.USER
+          ? userTimezone
+          : locationDetails?.value?.timezone;
+      if (timezone) {
+        label = getTimezoneLabel(timezone);
+      }
+      return {
+        value: option.value,
+        label
+      };
+    });
+  });
+
+  const selectedHistoricalDataTimeZoneConfig: Ref<HistoricalDataTimeZoneConfig> = computed(() => {
+    return historicalDataTimeZoneOptions.value.find(
+      option => option.value === generalConfigStore.selectedHistoricalDataTimeZoneConfig
+    );
+  });
 
   const refreshIntervalDuration = computed(() => {
     const period = generalConfigStore.selectedHistoryPeriod;
@@ -245,6 +285,10 @@ Location
     }
   }
 
+  function handleHistoricalDataTimeZoneChange(timezone: HistoricalDataTimeZone) {
+    useGeneralConfigStore().setSelectedHistoricalDataTimeZoneConfig(timezone);
+  }
+
   function handleChartPeriodChange(period: HistoryPeriod) {
     chartOptions.value.animation = {
       duration: 100
@@ -285,9 +329,27 @@ Location
       chartOptions.value = useChartjsOptions({
         measure: generalConfigStore.selectedMeasure,
         animated: true,
-        annotations
+        annotations,
+        timezone:
+          selectedHistoricalDataTimeZoneConfig.value.value === HistoricalDataTimeZone.USER
+            ? userTimezone
+            : locationDetails?.value?.timezone
       });
     }
+  });
+
+  watch(selectedHistoricalDataTimeZoneConfig, (newConfig: HistoricalDataTimeZoneConfig) => {
+;
+    
+    chartOptions.value = useChartjsOptions({
+        measure: generalConfigStore.selectedMeasure,
+        animated: true,
+        annotations: chartOptions.value.plugins.annotation.annotations as Record<string, AnnotationOptions>,
+        timezone:
+        newConfig.value === HistoricalDataTimeZone.LOCAL
+            ? locationDetails?.value?.timezone
+            : null
+      });
   });
 </script>
 
@@ -307,6 +369,10 @@ Location
 
   .period-control {
     max-width: 165px;
+  }
+
+  .tz-control {
+    max-width: fit-content;
   }
 
   .current-values {
