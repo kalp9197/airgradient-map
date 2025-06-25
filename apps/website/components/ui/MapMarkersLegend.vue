@@ -1,8 +1,11 @@
 <template>
   <div class="markers-info">
     <div class="markers-container">
-      <div v-for="marker in markers" :key="marker.type" 
-      :class="['marker-item', marker.class + '-item']">
+      <div
+        v-for="marker in markers"
+        :key="marker.type"
+        :class="['marker-item', marker.class + '-item']"
+      >
         <div :class="['marker-preview', marker.class]">9</div>
         <span class="marker-label">{{ marker.label }}</span>
       </div>

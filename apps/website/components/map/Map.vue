@@ -1,13 +1,13 @@
 <template>
   <div class="map-info-btn-box">
     <UiIconButton
-          :ripple="false"
-          :size="ButtonSize.NORMAL"
-          icon="mdi-information-outline"
-          :style="'map'"
-          @click="isLegendShown = !isLegendShown"
-        >
-        </UiIconButton>
+      :ripple="false"
+      :size="ButtonSize.NORMAL"
+      icon="mdi-information-outline"
+      :style="'map'"
+      @click="isLegendShown = !isLegendShown"
+    >
+    </UiIconButton>
   </div>
 
   <UiProgressBar :show="loading"></UiProgressBar>
@@ -33,7 +33,7 @@
       @ready="onMapReady"
     >
     </LMap>
-    <div v-if="!locationHistoryDialog?.isOpen && isLegendShown" class="legend-box">
+    <div v-if="isLegendShown" class="legend-box">
       <UiMapMarkersLegend />
       <UiColorsLegend />
     </div>
@@ -71,7 +71,7 @@
   import { useIntervalRefresh } from '~/composables/shared/useIntervalRefresh';
   import { CURRENT_DATA_REFRESH_INTERVAL } from '~/constants/map/refresh-interval';
   import UiMapMarkersLegend from '~/components/ui/MapMarkersLegend.vue';
-import { useStorage } from '@vueuse/core';
+  import { useStorage } from '@vueuse/core';
 
   const loading = ref<boolean>(false);
   const map = ref<typeof LMap>();
