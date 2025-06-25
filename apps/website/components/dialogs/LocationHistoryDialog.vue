@@ -61,21 +61,35 @@ Location
         <small v-if="chartOptions && locationDetails?.ownerName">
           Air quality data for this location is provided by
           <span v-if="!locationDetails?.url">
-            {{ locationDetails?.ownerName }}
+            {{
+              !locationDetails?.ownerName || locationDetails?.ownerName === 'unknown'
+                ? ' an anonymous contributor '
+                : locationDetails?.ownerName
+            }}
           </span>
           <span v-else>
             <a :href="locationDetails?.url" target="_blank">
-              {{ locationDetails?.ownerName }}
+              {{
+                !locationDetails?.ownerName || locationDetails?.ownerName === 'unknown'
+                  ? ' an anonymous contributor '
+                  : locationDetails?.ownerName
+              }}
+              <v-icon size="16">mdi-open-in-new</v-icon>
             </a>
           </span>
           via
           <span v-if="locationDetails?.dataSource === 'OpenAQ'">
             {{ locationDetails?.provider }} and
-            <a href="https://openaq.org/" target="_blank"> OpenAQ </a>
+            <a href="https://openaq.org/" target="_blank">
+              OpenAQ <v-icon size="16">mdi-open-in-new</v-icon></a
+            >
           </span>
 
           <span v-if="locationDetails?.dataSource === 'AirGradient'">
-            <a href="https://www.airgradient.com/" target="_blank"> AirGradient </a>
+            <a href="https://www.airgradient.com/" target="_blank">
+              AirGradient
+              <v-icon size="16">mdi-open-in-new</v-icon>
+            </a>
           </span>
 
           under
