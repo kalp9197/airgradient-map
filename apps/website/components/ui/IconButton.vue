@@ -5,7 +5,7 @@
     :disabled="disabled"
     :icon="icon"
     variant="plain"
-    class="custom-icon-button"
+    :class="['custom-icon-button', style]"
     :size="size === ButtonSize.NORMAL ? 'default' : 'small'"
     @click="handleClick"
   >
@@ -16,7 +16,7 @@
     :ripple="ripple"
     :disabled="disabled"
     variant="plain"
-    class="custom-icon-button"
+    :class="['custom-icon-button', style]"
     :size="size === ButtonSize.NORMAL ? 'default' : 'small'"
     @click="handleClick"
   >
@@ -89,6 +89,15 @@
     iconAlt: {
       type: String,
       default: 'Icon'
+    },
+    /**
+     * Style of the icon button.
+     * @type {'normal' | 'map'}
+     * @default 'normal'
+     */
+    style: {
+      type: String as PropType<'normal' | 'map'>,
+      default: 'normal'
     }
   });
 
@@ -113,6 +122,21 @@
     .custom-icon {
       filter: invert(42%) sepia(73%) saturate(323%) hue-rotate(171deg) brightness(113%)
         contrast(90%);
+    }
+  }
+
+  .custom-icon-button.map {
+    background-color: var(--main-white-color);
+    width: 34px;
+    height: 34px;
+    border-radius: 4px;
+    border: 2px solid rgba(0, 0, 0, 0.3);
+    opacity: 1;
+    font-size: var(--font-size-sm);
+
+    &:hover {
+      background-color: #f4f4f4;
+      color: #000000 !important;
     }
   }
 
