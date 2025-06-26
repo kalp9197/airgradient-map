@@ -41,7 +41,7 @@ Location
 
         <div class="d-flex align-center justify-center gap-2">
           <UiDropdownControl
-            v-if="chartOptions"
+            v-if="chartOptions && timezoneSelectShown"
             class="tz-control"
             :selected-value="selectedHistoricalDataTimeZoneConfig.value"
             :options="historicalDataTimeZoneOptions"
@@ -134,7 +134,8 @@ Location
   } from '~/constants/map/refresh-interval';
   import { HISTORICAL_DATA_TIMEZONE_OPTIONS } from '~/constants';
   import { useHistoricalDataTimezone } from '~/composables/shared/useHistoricalDataTimezone';
-import { AnnotationOptions } from 'chartjs-plugin-annotation';
+  import { AnnotationOptions } from 'chartjs-plugin-annotation';
+  import { DateTime } from 'luxon';
 
   const props = defineProps<{
     dialog: DialogInstance<{ location: AGMapLocationData }>;
@@ -151,6 +152,11 @@ import { AnnotationOptions } from 'chartjs-plugin-annotation';
   const historyLoading: Ref<boolean> = ref(false);
   const detailsLoading: Ref<boolean> = ref(false);
   const loading: Ref<boolean> = computed(() => historyLoading.value || detailsLoading.value);
+  const timezoneSelectShown: Ref<boolean> = computed(() => {
+    const userOffset = DateTime.now().toFormat('ZZ');
+    const locationOffset = DateTime.now().setZone(locationDetails?.value?.timezone).toFormat('ZZ');
+    return userOffset !== locationOffset;
+  });
   const historicalDataTimeZoneOptions: Ref<HistoricalDataTimeZoneConfig[]> = computed(() => {
     return HISTORICAL_DATA_TIMEZONE_OPTIONS.map(option => {
       let label = option.label;
@@ -339,17 +345,19 @@ import { AnnotationOptions } from 'chartjs-plugin-annotation';
   });
 
   watch(selectedHistoricalDataTimeZoneConfig, (newConfig: HistoricalDataTimeZoneConfig) => {
-;
-    
+    if (!chartOptions.value) {
+      return;
+    }
     chartOptions.value = useChartjsOptions({
-        measure: generalConfigStore.selectedMeasure,
-        animated: true,
-        annotations: chartOptions.value.plugins.annotation.annotations as Record<string, AnnotationOptions>,
-        timezone:
-        newConfig.value === HistoricalDataTimeZone.LOCAL
-            ? locationDetails?.value?.timezone
-            : null
-      });
+      measure: generalConfigStore.selectedMeasure,
+      animated: true,
+      annotations: chartOptions.value.plugins.annotation.annotations as Record<
+        string,
+        AnnotationOptions
+      >,
+      timezone:
+        newConfig.value === HistoricalDataTimeZone.LOCAL ? locationDetails?.value?.timezone : null
+    });
   });
 </script>
 

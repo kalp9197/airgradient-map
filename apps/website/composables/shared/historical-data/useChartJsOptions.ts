@@ -74,13 +74,13 @@ export function useChartjsOptions({
           displayFormats: {
             quarter: 'MMM YYYY'
           },
-          parser: (date: string): any => {
-            if (timezone) {              
+          parser: (date: string): number => {
+            if (timezone) {
               return DateTime.fromISO(date)
-                .setZone(timezone)             
-                .toFormat('yyyy-MM-dd\'T\'HH:mm:ss');
+                .setZone(timezone)
+                .toFormat("yyyy-MM-dd'T'HH:mm:ss") as unknown as number;
             } else {
-              return date;
+              return date as unknown as number;
             }
           }
         }

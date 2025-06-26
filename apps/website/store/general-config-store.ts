@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { HISTORY_PERIODS } from '~/constants';
-import { HistoricalDataTimeZone, HistoricalDataTimeZoneConfig, HistoryPeriodConfig } from '~/types';
+import { HistoricalDataTimeZone, HistoryPeriodConfig } from '~/types';
 
 import { MeasureNames } from '~/types';
 import { GeneralConfigStoreState } from '~/types';
