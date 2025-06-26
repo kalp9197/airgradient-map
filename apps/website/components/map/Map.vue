@@ -1,4 +1,15 @@
 <template>
+  <div class="map-info-btn-box">
+    <UiIconButton
+      :ripple="false"
+      :size="ButtonSize.NORMAL"
+      icon="mdi-information-outline"
+      :style="'map'"
+      @click="isLegendShown = !isLegendShown"
+    >
+    </UiIconButton>
+  </div>
+
   <UiProgressBar :show="loading"></UiProgressBar>
   <div id="map">
     <div class="map-controls">
@@ -22,7 +33,8 @@
       @ready="onMapReady"
     >
     </LMap>
-    <div v-if="!locationHistoryDialog?.isOpen" class="legend-box">
+    <div v-if="isLegendShown" class="legend-box">
+      <UiMapMarkersLegend />
       <UiColorsLegend />
     </div>
   </div>
@@ -47,7 +59,8 @@
     AGMapDataItemType,
     SensorType,
     DropdownOption,
-    DialogId
+    DialogId,
+    ButtonSize
   } from '~/types';
   import { DEFAULT_MAP_VIEW_CONFIG, MEASURE_LABELS_WITH_UNITS } from '~/constants';
   import { useUrlState } from '~/composables/shared/ui/useUrlState';
@@ -55,13 +68,26 @@
   import { pm25ToAQI } from '~/utils/aqi';
   import { useGeneralConfigStore } from '~/store/general-config-store';
   import { dialogStore } from '~/composables/shared/ui/useDialog';
+  import { useIntervalRefresh } from '~/composables/shared/useIntervalRefresh';
+  import { CURRENT_DATA_REFRESH_INTERVAL } from '~/constants/map/refresh-interval';
+  import UiMapMarkersLegend from '~/components/ui/MapMarkersLegend.vue';
+  import { useStorage } from '@vueuse/core';
 
   const loading = ref<boolean>(false);
   const map = ref<typeof LMap>();
   const apiUrl = useRuntimeConfig().public.apiUrl;
   const generalConfigStore = useGeneralConfigStore();
+  const { startRefreshInterval, stopRefreshInterval, isRefreshIntervalActive } = useIntervalRefresh(
+    updateMapData,
+    CURRENT_DATA_REFRESH_INTERVAL,
+    {
+      skipFirstRefresh: true,
+      skipOnVisibilityHidden: true
+    }
+  );
 
   const locationHistoryDialogId = DialogId.LOCATION_HISTORY_CHART;
+  const isLegendShown = useStorage('isLegendShown', true);
 
   const { urlState, setUrlState } = useUrlState();
 
@@ -171,6 +197,16 @@
       long: mapInstance.getCenter().lng.toFixed(2)
     });
 
+    if (isRefreshIntervalActive.value) {
+      stopRefreshInterval();
+    } else {
+      startRefreshInterval();
+    }
+
+    await updateMapData();
+  }
+
+  async function updateMapData(): Promise<void> {
     try {
       const bounds: LatLngBounds = mapInstance.getBounds();
       const response = await $fetch<AGMapData>(`${apiUrl}/measurements/current/cluster`, {
@@ -450,11 +486,23 @@
 
   .legend-box {
     position: absolute;
-    bottom: 20px;
+    bottom: 30px;
     left: 50%;
     z-index: 400;
     width: 900px;
     transform: translateX(-50%);
     max-width: 90%;
+    display: flex;
+    gap: 20px;
+    flex-direction: column;
+    align-items: center;
+    text-shadow: 1px 2px 2px rgb(108 108 108 / 43%);
+  }
+
+  .map-info-btn-box {
+    position: absolute;
+    top: 90px;
+    left: 10px;
+    z-index: 999;
   }
 </style>

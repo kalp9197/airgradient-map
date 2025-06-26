@@ -39,15 +39,27 @@ Location
           </div>
         </div>
 
-        <UiDropdownControl
-          v-if="chartOptions"
-          class="period-control"
-          :selected-value="generalConfigStore.selectedHistoryPeriod.value"
-          :options="HISTORY_PERIODS"
-          :disabled="loading"
-          @change="handleChartPeriodChange"
-        >
-        </UiDropdownControl>
+        <div class="d-flex align-center justify-center gap-2">
+          <UiDropdownControl
+            v-if="chartOptions && timezoneSelectShown"
+            class="tz-control"
+            :selected-value="selectedHistoricalDataTimeZoneConfig.value"
+            :options="historicalDataTimeZoneOptions"
+            :disabled="loading"
+            @change="handleHistoricalDataTimeZoneChange"
+          >
+          </UiDropdownControl>
+
+          <UiDropdownControl
+            v-if="chartOptions"
+            class="period-control"
+            :selected-value="generalConfigStore.selectedHistoryPeriod.value"
+            :options="HISTORY_PERIODS"
+            :disabled="loading"
+            @change="handleChartPeriodChange"
+          >
+          </UiDropdownControl>
+        </div>
       </div>
       <ClientOnly>
         <div class="chart-container">
@@ -61,21 +73,35 @@ Location
         <small v-if="chartOptions && locationDetails?.ownerName">
           Air quality data for this location is provided by
           <span v-if="!locationDetails?.url">
-            {{ locationDetails?.ownerName }}
+            {{
+              !locationDetails?.ownerName || locationDetails?.ownerName === 'unknown'
+                ? ' an anonymous contributor '
+                : locationDetails?.ownerName
+            }}
           </span>
           <span v-else>
             <a :href="locationDetails?.url" target="_blank">
-              {{ locationDetails?.ownerName }}
+              {{
+                !locationDetails?.ownerName || locationDetails?.ownerName === 'unknown'
+                  ? ' an anonymous contributor '
+                  : locationDetails?.ownerName
+              }}
+              <v-icon size="16">mdi-open-in-new</v-icon>
             </a>
           </span>
           via
           <span v-if="locationDetails?.dataSource === 'OpenAQ'">
             {{ locationDetails?.provider }} and
-            <a href="https://openaq.org/" target="_blank"> OpenAQ </a>
+            <a href="https://openaq.org/" target="_blank">
+              OpenAQ <v-icon size="16">mdi-open-in-new</v-icon></a
+            >
           </span>
 
           <span v-if="locationDetails?.dataSource === 'AirGradient'">
-            <a href="https://www.airgradient.com/" target="_blank"> AirGradient </a>
+            <a href="https://www.airgradient.com/" target="_blank">
+              AirGradient
+              <v-icon size="16">mdi-open-in-new</v-icon>
+            </a>
           </span>
 
           under
@@ -90,13 +116,16 @@ Location
   import {
     ColorsLegendSize,
     DialogSize,
+    HistoricalDataTimeZone,
+    HistoricalDataTimeZoneConfig,
+    HistoryBucket,
     HistoryPeriod,
     HistoryPeriodConfig,
     LocationDetails,
     MeasureNames,
     SensorType
   } from '~/types';
-  import { onMounted, ref, Ref, watch, computed } from 'vue';
+  import { onMounted, ref, Ref, watch, computed, onUnmounted } from 'vue';
   import { Bar } from 'vue-chartjs';
   import { ChartData, ChartOptions } from 'chart.js';
 
@@ -112,6 +141,15 @@ Location
   import { getAQIColor, getCO2Color, getPM25Color } from '~/utils';
   import { MEASURE_UNITS } from '~/constants/shared/measure-units';
   import { useChartJsAnnotations } from '~/composables/shared/historical-data/useChartJsAnnotations';
+  import { useIntervalRefresh } from '~/composables/shared/useIntervalRefresh';
+  import {
+    MINUTELY_HISTORICAL_DATA_REFRESH_INTERVAL,
+    HOURLY_HISTORICAL_DATA_REFRESH_INTERVAL
+  } from '~/constants/map/refresh-interval';
+  import { HISTORICAL_DATA_TIMEZONE_OPTIONS } from '~/constants';
+  import { useHistoricalDataTimezone } from '~/composables/shared/useHistoricalDataTimezone';
+  import { AnnotationOptions } from 'chartjs-plugin-annotation';
+  import { DateTime } from 'luxon';
 
   const props = defineProps<{
     dialog: DialogInstance<{ location: AGMapLocationData }>;
@@ -119,6 +157,7 @@ Location
 
   const apiUrl = useRuntimeConfig().public.apiUrl;
   const generalConfigStore = useGeneralConfigStore();
+  const { getTimezoneLabel, userTimezone } = useHistoricalDataTimezone();
   const mapLocationData: Ref<AGMapLocationData> = ref(null);
   const locationHistoryData: Ref<LocationHistoryData> = ref(null);
   const locationDetails: Ref<LocationDetails> = ref(null);
@@ -127,6 +166,55 @@ Location
   const historyLoading: Ref<boolean> = ref(false);
   const detailsLoading: Ref<boolean> = ref(false);
   const loading: Ref<boolean> = computed(() => historyLoading.value || detailsLoading.value);
+  const timezoneSelectShown: Ref<boolean> = computed(() => {
+    const userOffset = DateTime.now().toFormat('ZZ');
+    const locationOffset = DateTime.now().setZone(locationDetails?.value?.timezone).toFormat('ZZ');
+    return userOffset !== locationOffset;
+  });
+  const historicalDataTimeZoneOptions: Ref<HistoricalDataTimeZoneConfig[]> = computed(() => {
+    return HISTORICAL_DATA_TIMEZONE_OPTIONS.map(option => {
+      let label = option.label;
+      const timezone =
+        option.value === HistoricalDataTimeZone.USER
+          ? userTimezone
+          : locationDetails?.value?.timezone;
+      if (timezone) {
+        label = getTimezoneLabel(timezone);
+      }
+      return {
+        value: option.value,
+        label
+      };
+    });
+  });
+
+  const selectedHistoricalDataTimeZoneConfig: Ref<HistoricalDataTimeZoneConfig> = computed(() => {
+    return historicalDataTimeZoneOptions.value.find(
+      option => option.value === generalConfigStore.selectedHistoricalDataTimeZoneConfig
+    );
+  });
+
+  const refreshIntervalDuration = computed(() => {
+    const period = generalConfigStore.selectedHistoryPeriod;
+    return period.defaultBucketSize === HistoryBucket.MINUTES_15
+      ? MINUTELY_HISTORICAL_DATA_REFRESH_INTERVAL
+      : HOURLY_HISTORICAL_DATA_REFRESH_INTERVAL;
+  });
+
+  const { startRefreshInterval, stopRefreshInterval, resetIntervalDuration } = useIntervalRefresh(
+    () => {
+      chartOptions.value.animation = false;
+      return fetchLocationHistory(mapLocationData.value?.locationId);
+    },
+    refreshIntervalDuration.value,
+    {
+      skipFirstRefresh: true,
+      onError: error => {
+        console.error('Failed to refresh historical data:', error);
+      },
+      skipOnVisibilityHidden: true
+    }
+  );
 
   const currentValueData: Ref<{
     bgColor: string;
@@ -217,12 +305,20 @@ Location
     }
   }
 
+  function handleHistoricalDataTimeZoneChange(timezone: HistoricalDataTimeZone) {
+    useGeneralConfigStore().setSelectedHistoricalDataTimeZoneConfig(timezone);
+  }
+
   function handleChartPeriodChange(period: HistoryPeriod) {
+    chartOptions.value.animation = {
+      duration: 100
+    };
     const periodConfig = HISTORY_PERIODS.find(
       (periodConfig: HistoryPeriodConfig) => periodConfig.value === period
     );
     useGeneralConfigStore().setSelectedHistoryPeriod(periodConfig);
     fetchLocationHistory(mapLocationData.value.locationId);
+    resetIntervalDuration(refreshIntervalDuration.value);
   }
 
   onMounted(() => {
@@ -230,7 +326,12 @@ Location
     if (mapLocationData.value) {
       fetchLocationHistory(mapLocationData.value.locationId);
       fetchLocationDetails(mapLocationData.value.locationId);
+      startRefreshInterval();
     }
+  });
+
+  onUnmounted(() => {
+    stopRefreshInterval();
   });
 
   watch(locationHistoryData, (newData: LocationHistoryData) => {
@@ -248,9 +349,29 @@ Location
       chartOptions.value = useChartjsOptions({
         measure: generalConfigStore.selectedMeasure,
         animated: true,
-        annotations
+        annotations,
+        timezone:
+          selectedHistoricalDataTimeZoneConfig.value.value === HistoricalDataTimeZone.USER
+            ? userTimezone
+            : locationDetails?.value?.timezone
       });
     }
+  });
+
+  watch(selectedHistoricalDataTimeZoneConfig, (newConfig: HistoricalDataTimeZoneConfig) => {
+    if (!chartOptions.value) {
+      return;
+    }
+    chartOptions.value = useChartjsOptions({
+      measure: generalConfigStore.selectedMeasure,
+      animated: true,
+      annotations: chartOptions.value.plugins.annotation.annotations as Record<
+        string,
+        AnnotationOptions
+      >,
+      timezone:
+        newConfig.value === HistoricalDataTimeZone.LOCAL ? locationDetails?.value?.timezone : null
+    });
   });
 </script>
 
@@ -281,6 +402,10 @@ Location
 
   .period-control {
     max-width: 165px;
+  }
+
+  .tz-control {
+    max-width: fit-content;
   }
 
   .current-values {

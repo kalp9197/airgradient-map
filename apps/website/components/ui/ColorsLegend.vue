@@ -124,6 +124,9 @@
     .desktop-legend {
       display: none;
     }
+    .mobile-legend {
+      font-size: var(--font-size-sm);
+    }
   }
 
   @media (min-width: 780px) {

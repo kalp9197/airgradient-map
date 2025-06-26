@@ -30,3 +30,8 @@ export enum ColorsLegendSize {
   SMALL = 'small',
   MEDIUM = 'medium'
 }
+
+export enum MarkersLegendSize {
+  SMALL = 'small',
+  MEDIUM = 'medium'
+}
