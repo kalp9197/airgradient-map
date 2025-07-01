@@ -1,0 +1,52 @@
+name: Build Nuxt App
+
+on:
+  push:
+    branches:
+      - main
+      - development
+  pull_request:
+    branches:
+      - main
+      - development
+
+jobs:
+  build:
+    name: Build Nuxt Site
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [22]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+
+      - name: Clean node_modules and package-lock.json (workaround for Rollup bug)
+        run: rm -rf node_modules package-lock.json
+
+      - name: Install dependencies
+        run: |
+          rm -rf node_modules package-lock.json
+          npm install --ignore-scripts
+          npm install @rollup/rollup-linux-x64-gnu
+          npx nuxt prepare
+
+      - name: Build site
+        run: npm run build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuxt-ssr-build
+          path: |
+            .output/public
+            .output/server

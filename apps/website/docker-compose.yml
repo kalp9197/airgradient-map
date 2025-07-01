@@ -1,0 +1,17 @@
+services:
+  app:
+    container_name: ag-map-client
+    build:
+      context: .
+      target: build
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - .nuxt:/app/.nuxt
+    command: npm run dev
+    environment:
+      - HOST=0.0.0.0
+      - PORT=3000
+      - NODE_ENV=development

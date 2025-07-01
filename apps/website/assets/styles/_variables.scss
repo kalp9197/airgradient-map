@@ -1,0 +1,91 @@
+:root {
+  --primary-font: 'Catamaran', sans-serif;
+  --secondary-font: 'Cabin', sans-serif;
+  --main-text-color: #212121;
+  --main-white-color: #ffffff;
+  --main-disabled-color: var(--grayColor500);
+  --light-disabled-color: rgba(0, 0, 0, 0.12);
+
+  --primary-color: var(--primaryColor500);
+  --dark-primary-color: var(--primaryColor700);
+  --light-primary-color: var(--primaryColor100);
+  --secondary-color: var(--secondaryColor500);
+  --main-transition: 0.2s ease-in-out;
+
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-ml: 18px;
+  --font-size-lg: 24px;
+  --font-size-xl: 32px;
+  --font-size-xxl: 42px;
+  --font-size-xxxl: 60px;
+
+  --font-weight-light: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+
+
+  // EXTENDED PRIMARY COLOR PALETTE
+  --primaryColor900: #082338;
+  --primaryColor800: #0e3a5e;
+  --primaryColor700: #02579a;
+  --primaryColor600: #1969a9;
+  --primaryColor500: #1c75bc;
+  --primaryColor400: #49aeff;
+  --primaryColor300: #76acd6;
+  --primaryColor200: #a4c7e4;
+  --primaryColor100: #d4ecff;
+
+  // EXTENDED SECONDARY COLOR PALETTE
+  --secondaryColor900: #4b2504;
+  --secondaryColor800: #7e3f08;
+  --secondaryColor700: #b0580b;
+  --secondaryColor600: #e2710e;
+  --secondaryColor500: #fc7e10;
+  --secondaryColor400: #fc973f;
+  --secondaryColor300: #fdb16f;
+  --secondaryColor200: #fdcb9f;
+  --secondaryColor100: #fee5cf;
+
+  // EXTENDED GRAY COLOR PALETTE
+  --grayColor900: #313131;
+  --grayColor800: #595959;
+  --grayColor700: #7c7c7c;
+  --grayColor600: #868686;
+  --grayColor500: #a3a1a1;
+  --grayColor400: #bababa;
+  --grayColor300: #d9d9d9;
+  --grayColor200: #e3e3e3;
+  --grayColor100: #f1f0f0;
+
+  // MAP COLOR PALETTE
+  --airGreen: #1de208;
+  --airYellow: #e2e020;
+  --airOrange: #e26a05;
+  --airRed: #e20410;
+  --airPurple: #7f01e2;
+  --airBrown: #903305;
+  --airBlue: #1b75bc;
+  --airGray: #778899;
+  --airLightGray: #d5d5d5;
+  --airDefault: #d5d5d5;
+
+  --airGreenDark: #2b9b20;
+  --airYellowDark: #c7ac1d;
+  --airOrangeDark: #b94f04;
+  --airRedDark: #881218;
+  --airPurpleDark: #521681;
+  --airBrownDark: #54230b;
+  --airBlueDark: #134f7e;
+  --airGrayDark: #4c5660;
+  --airLightGrayDark: #989696;
+  --airDefaultDark: #989696;
+
+  // SYSTEM COLOR PALETTE
+  --errorColor: #f24d4d;
+  --errorColorLight: #e57373;
+  --successColor: #4caf50;
+  --warningColor: #f2b74a;
+  --infoColor: #25c4fe;
+}

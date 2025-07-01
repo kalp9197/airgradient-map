@@ -1,0 +1,11 @@
+services:
+  app:
+    build:
+      context: .
+    ports:
+      - "3001:80"
+    environment:
+      - NODE_ENV=production
+      - HOST=0.0.0.0
+      - PORT=80
+    restart: unless-stopped

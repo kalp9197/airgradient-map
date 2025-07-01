@@ -1,0 +1,27 @@
+.layout-enter-active,
+.layout-leave-active {
+    transition: all 0.2s;
+}
+
+.layout-enter-from,
+.layout-leave-to {
+    opacity: 0;
+    visibility: hidden;
+    filter: grayscale(1);
+}
+
+.layout-enter-to,
+.layout-leave-from {
+    opacity: 1;
+    visibility: visible;
+    filter: none;
+}
+
+.page-enter-active,
+.page-leave-active {
+    transition: opacity 0.2s ease-in-out;
+}
+.page-enter,
+.page-leave-active {
+    opacity: 0;
+}

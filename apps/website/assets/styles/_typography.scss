@@ -1,0 +1,131 @@
+@use "variables" as *;
+@use "mixins" as *;
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-weight: var(--font-weight-light);
+  line-height: 1.2;
+  color: var(--main-text-color);
+  font-family: var(--primary-font);
+  -webkit-font-smoothing: antialiased;
+  font-size: var(--font-size-base);
+}
+
+h1 {
+  font-size: var(--font-size-xxxl);
+  line-height: 1.2;
+  font-weight: var(--font-weight-bold);
+  font-family: var(--secondary-font);
+  color: var(--primary-color);
+}
+
+h2 {
+  font-size: var(--font-size-xxl);
+  line-height: 1.2;
+  font-weight: var(--font-weight-light);
+  color: var(--primary-color);
+  font-family: var(--secondary-font);
+  margin-bottom: 20px;
+}
+
+h3 {
+  font-size: var(--font-size-xl);
+  line-height: 1.2;
+  font-weight: var(--font-weight-medium);
+  font-family: var(--secondary-font);
+  color: var(--main-text-color);
+  margin-bottom: 36px;
+}
+
+h4 {
+  font-size: var(--font-size-lg);
+  line-height: 1.2;
+  font-weight: var(--font-weight-bold);
+  margin-bottom: 20px;
+  font-family: var(--secondary-font);
+  color: var(--main-text-color);
+}
+
+h5 {
+  font-size: var(--font-size-ml);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.2;
+  color: var(--main-text-color);
+  margin-bottom: 20px;
+  font-family: var(--secondary-font);
+}
+
+p {
+  font-size: var(--font-size-base);
+  color: var(--main-text-color);
+  line-height: 1.2;
+}
+
+p.small {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-light);
+  line-height: 1.2;
+  font-family: var(--primary-font);
+}
+
+small {
+  font-size: var(--font-size-sm);
+  color: var(--main-text-color);
+  line-height: 1.2;
+}
+
+@include mobile {
+  h1 {
+    font-size: 60px;
+    line-height: 72px;
+  }
+
+  h2 {
+    font-size: 42px;
+    line-height: 51px;
+  }
+
+  h3 {
+    font-size: 30px;
+    line-height: normal;
+  }
+
+  h4 {
+    font-size: 21px;
+    line-height: normal;
+  }
+
+  h5 {
+    font-size: 18px;
+    line-height: normal;
+  }
+}
+
+
+.text-grey {
+  color: var(--grayColor700);
+}
+
+.text-dark {
+  color: var(--main-text-color) !important;
+}
+
+.accent-text {
+  color: var(--primary-color) !important;
+}
+
+ul {
+  font-size: 18px;
+  list-style: square;
+  text-align: left;
+}
+
+a,
+a:active,
+a:focus,
+a:active {
+  text-decoration: none;
+}
